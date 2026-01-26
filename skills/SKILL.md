@@ -14,13 +14,17 @@ Use this skill whenever users need to integrate a game with Play.fun or fetch da
 Read individual skill pages for specific use cases. Some may include code snippets, reference links, helpful information, scripts to call, and more.
 
 - [API Reference](api/reference.md) - Complete API endpoint reference for Play.fun.
-- [API Authentication](api/authentication.md) - HMAC-SHA256 authentication guide for the Play.fun API.
+- [API Authentication](api/authentication.md) - How to use HMAC-SHA256 authentication for the Play.fun API.
 - [SDK Best Practices](sdks/best-practices.md) - Best practices for using the Play.fun SDKs.
 - [Server SDK Reference](sdks/server.md) - Server-side SDK reference for Play.fun.
 - [Browser SDK Reference](sdks/browser.md) - Browser SDK reference for Play.fun.
 - [Hybrid SDK Reference](sdks/hybrid.md) - Hybrid SDK reference for Play.fun (Browser + Server SDKs combined).
 - [MCP Quickstart](mcp/quickstart.md) - Quickstart guide for using the Play.fun MCP.
 - [Glossary](glossary.md) - Definitions of Play.fun terms and concepts.
+
+### Authentication
+
+- [Auth Setup](auth/setup.md) - Set up Play.fun API credentials for authenticated operations.
 
 ### Deployment
 
