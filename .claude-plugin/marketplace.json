@@ -1,0 +1,23 @@
+{
+  "name": "playdotfun",
+  "owner": {
+    "name": "Play.fun",
+    "url": "https://play.fun"
+  },
+  "metadata": {
+    "description": "Best practices, references, and templates for integrating games with the Play.fun ecosystem",
+    "version": "1.0.0",
+    "repository": "https://github.com/OpusGameLabs/skills"
+  },
+  "plugins": [
+    {
+      "name": "playdotfun",
+      "description": "Play.fun integration skill — SDKs, API reference, authentication, MCP tools, and code snippets for game developers",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills"
+      ]
+    }
+  ]
+}
