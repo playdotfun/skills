@@ -24,7 +24,7 @@ Read individual skill pages for specific use cases. Some may include code snippe
 
 ### Authentication
 
-- [Auth Setup](auth/setup.md) - Set up Play.fun API credentials for authenticated operations.
+- [Auth Setup](auth/SKILL.md) - Skill to set up Play.fun API credentials for authenticated operations.
 
 ### Deployment
 

@@ -27,13 +27,14 @@ This method starts a local server that receives credentials via redirect from Pl
 
 **Steps:**
 
-1. Run the callback server:
+1. Run the callback server in the background and ensure it is running:
    ```bash
    node skills/scripts/playfun-auth.js callback
    ```
 2. The server will start on `http://localhost:9876`
-3. Open the user's browser to: `https://app.play.fun/skills-auth?callback=http://localhost:9876/callback`
+3. Prompt the user to open the browser to: `https://app.play.fun/skills-auth?callback=http://localhost:9876/callback`
 4. The user will be prompted to authenticate with Play.fun if not done already, and then the redirect will occur with the credentials (also displayed in the browser window to be pasted into the terminal if needed)
+5. The script automatically saves credentials to `~/.playfun/config.json` and `~/.claude.json`
 
 **Notes:**
 
