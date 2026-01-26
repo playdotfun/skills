@@ -25,6 +25,12 @@ npx skills add OpusGameLabs/skills
 | [MCP Quickstart](skills/mcp/quickstart.md) | MCP server setup for AI assistants |
 | [Glossary](skills/glossary.md) | Play.fun terminology and concepts |
 
+### Deployment
+
+| Guide | Description |
+|-------|-------------|
+| [GitHub Pages Deploy](skills/github-pages/deploy.md) | Deploy games to GitHub Pages for free hosting |
+
 ### Code Snippets
 
 | Snippet | Description |

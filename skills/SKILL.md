@@ -22,6 +22,10 @@ Read individual skill pages for specific use cases. Some may include code snippe
 - [MCP Quickstart](mcp/quickstart.md) - Quickstart guide for using the Play.fun MCP.
 - [Glossary](glossary.md) - Definitions of Play.fun terms and concepts.
 
+### Deployment
+
+- [GitHub Pages Deploy](github-pages/deploy.md) - Deploy games to GitHub Pages for free hosting and get a public URL.
+
 ### Code Snippets
 
 - [Server SDK Snippets](snippets/server-sdk.md) - Copy-paste code examples for server-side integration.
