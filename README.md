@@ -9,7 +9,7 @@ Play.fun is a platform for integrating games with Web3 rewards. Games can regist
 ## Installation
 
 ```bash
-claude mcp add-skill https://github.com/OpusGameLabs/skills
+npx skills add OpusGameLabs/skills
 ```
 
 ## Skill Contents
