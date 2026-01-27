@@ -23,11 +23,10 @@ const os = require('os');
 const readline = require('readline');
 
 // Configuration
-const CONFIG_DIR = path.join(os.homedir(), '.playfun');
-const CONFIG_FILE = path.join(CONFIG_DIR, 'config.json');
 const CLAUDE_CONFIG_FILE = path.join(os.homedir(), '.claude.json');
 const CALLBACK_PORT = 9876;
 const CALLBACK_TIMEOUT = 5 * 60 * 1000; // 5 minutes
+const MCP_SERVER_NAME = 'play-fun';
 
 // Colors for terminal output
 const colors = {
@@ -60,61 +59,6 @@ function logWarning(message) {
 }
 
 /**
- * Ensure the config directory exists with proper permissions
- */
-function ensureConfigDir() {
-  if (!fs.existsSync(CONFIG_DIR)) {
-    fs.mkdirSync(CONFIG_DIR, { mode: 0o700 });
-  }
-}
-
-/**
- * Read the stored credentials
- */
-function readCredentials() {
-  if (!fs.existsSync(CONFIG_FILE)) {
-    return null;
-  }
-  try {
-    const content = fs.readFileSync(CONFIG_FILE, 'utf8');
-    return JSON.parse(content);
-  } catch (error) {
-    return null;
-  }
-}
-
-/**
- * Save credentials to config file
- */
-function saveCredentials(apiKey, secretKey, source) {
-  ensureConfigDir();
-
-  const config = {
-    apiKey,
-    secretKey,
-    createdAt: new Date().toISOString(),
-    source,
-  };
-
-  fs.writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2), {
-    mode: 0o600,
-  });
-
-  return config;
-}
-
-/**
- * Clear stored credentials
- */
-function clearCredentials() {
-  if (fs.existsSync(CONFIG_FILE)) {
-    fs.unlinkSync(CONFIG_FILE);
-    return true;
-  }
-  return false;
-}
-
-/**
  * Read the Claude config file
  */
 function readClaudeConfig() {
@@ -130,9 +74,26 @@ function readClaudeConfig() {
 }
 
 /**
- * Update the Claude config with Play.fun MCP credentials
+ * Read credentials from Claude config
  */
-function updateClaudeConfig(apiKey, secretKey) {
+function readCredentialsFromClaudeConfig() {
+  const config = readClaudeConfig();
+  const serverConfig = config.mcpServers?.[MCP_SERVER_NAME];
+
+  if (!serverConfig?.headers?.['x-api-key'] || !serverConfig?.headers?.['x-secret-key']) {
+    return null;
+  }
+
+  return {
+    apiKey: serverConfig.headers['x-api-key'],
+    secretKey: serverConfig.headers['x-secret-key'],
+  };
+}
+
+/**
+ * Save credentials to Claude config
+ */
+function saveCredentialsToClaudeConfig(apiKey, secretKey) {
   const config = readClaudeConfig();
 
   // Ensure mcpServers object exists
@@ -141,7 +102,7 @@ function updateClaudeConfig(apiKey, secretKey) {
   }
 
   // Update or create the play-fun MCP server config
-  config.mcpServers['play-fun'] = {
+  config.mcpServers[MCP_SERVER_NAME] = {
     type: 'http',
     url: 'https://mcp.play.fun/mcp',
     headers: {
@@ -157,12 +118,11 @@ function updateClaudeConfig(apiKey, secretKey) {
 /**
  * Remove Play.fun credentials from Claude config
  */
-function removeFromClaudeConfig() {
+function clearCredentialsFromClaudeConfig() {
   const config = readClaudeConfig();
 
-  if (config.mcpServers && config.mcpServers['play-fun']) {
-    // Remove env credentials but keep the server config
-    delete config.mcpServers['play-fun'].env;
+  if (config.mcpServers && config.mcpServers[MCP_SERVER_NAME]) {
+    delete config.mcpServers[MCP_SERVER_NAME];
     fs.writeFileSync(CLAUDE_CONFIG_FILE, JSON.stringify(config, null, 2));
     return true;
   }
@@ -198,31 +158,20 @@ function decodeCredentials(base64String) {
  * Check status of stored credentials
  */
 function checkStatus() {
-  const creds = readCredentials();
+  const creds = readCredentialsFromClaudeConfig();
 
   console.log('\n--- Play.fun Authentication Status ---\n');
 
   if (!creds) {
     logWarning('No credentials found');
-    logInfo(`Config location: ${CONFIG_FILE}`);
+    logInfo(`Config location: ${CLAUDE_CONFIG_FILE}`);
     console.log('\nRun "node playfun-auth.js setup" to configure credentials.\n');
     return false;
   }
 
-  logSuccess('Credentials found');
+  logSuccess('Credentials configured');
   console.log(`  API Key: ${creds.apiKey.substring(0, 8)}...`);
-  console.log(`  Source: ${creds.source}`);
-  console.log(`  Created: ${creds.createdAt}`);
-  console.log(`  Config: ${CONFIG_FILE}`);
-
-  // Check Claude config
-  const claudeConfig = readClaudeConfig();
-  if (claudeConfig.mcpServers?.['play-fun']?.env?.['x-api-key']) {
-    logSuccess('Claude config updated');
-  } else {
-    logWarning('Claude config not updated');
-    logInfo('Run "node playfun-auth.js setup" to update Claude config');
-  }
+  console.log(`  Config: ${CLAUDE_CONFIG_FILE}`);
 
   console.log('\nUse the test_connection MCP tool to verify credentials work.\n');
   return true;
@@ -257,9 +206,8 @@ function startCallbackServer() {
         try {
           const { apiKey, secretKey } = decodeCredentials(credentials);
 
-          // Save credentials
-          saveCredentials(apiKey, secretKey, 'callback');
-          updateClaudeConfig(apiKey, secretKey);
+          // Save credentials to Claude config
+          saveCredentialsToClaudeConfig(apiKey, secretKey);
 
           res.writeHead(200, { 'Content-Type': 'text/html' });
           res.end(`
@@ -356,15 +304,13 @@ function handleManual(base64String) {
   try {
     const { apiKey, secretKey } = decodeCredentials(base64String);
 
-    // Save credentials
-    saveCredentials(apiKey, secretKey, 'manual');
-    updateClaudeConfig(apiKey, secretKey);
+    // Save credentials to Claude config
+    saveCredentialsToClaudeConfig(apiKey, secretKey);
 
     console.log('\n--- Credentials Saved ---\n');
-    logSuccess('Credentials decoded and saved');
-    logSuccess('Claude config updated');
+    logSuccess('Credentials saved to Claude config');
     console.log(`\nAPI Key: ${apiKey.substring(0, 8)}...`);
-    console.log(`Config: ${CONFIG_FILE}`);
+    console.log(`Config: ${CLAUDE_CONFIG_FILE}`);
     console.log('\nUse the test_connection MCP tool to verify credentials work.\n');
 
   } catch (error) {
@@ -379,17 +325,12 @@ function handleManual(base64String) {
 function handleClear() {
   console.log('\n--- Clearing Credentials ---\n');
 
-  const clearedConfig = clearCredentials();
-  const clearedClaude = removeFromClaudeConfig();
+  const cleared = clearCredentialsFromClaudeConfig();
 
-  if (clearedConfig) {
-    logSuccess('Removed credentials from config');
-  } else {
-    logWarning('No credentials file found');
-  }
-
-  if (clearedClaude) {
+  if (cleared) {
     logSuccess('Removed credentials from Claude config');
+  } else {
+    logWarning('No credentials found in Claude config');
   }
 
   console.log('\nCredentials cleared.\n');
