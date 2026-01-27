@@ -34,7 +34,7 @@ This method starts a local server that receives credentials via redirect from Pl
 2. The server will start on `http://localhost:9876`
 3. Prompt the user to open the browser to: `https://app.play.fun/skills-auth?callback=http://localhost:9876/callback`
 4. The user will be prompted to authenticate with Play.fun if not done already, and then the redirect will occur with the credentials (also displayed in the browser window to be pasted into the terminal if needed)
-5. The script automatically saves credentials to `~/.playfun/config.json` and `~/.claude.json`
+5. The script automatically saves credentials to `~/.claude.json`
 
 **Notes:**
 
@@ -102,16 +102,14 @@ To remove stored credentials:
 node skills/scripts/playfun-auth.js clear
 ```
 
-This removes credentials from both:
+This removes credentials from:
 
-- `~/.playfun/config.json`
 - `~/.claude.json` MCP server config
 
 ## Credential Storage
 
 **Locations:**
 
-- Credentials: `~/.playfun/config.json` (permissions: 600)
 - Claude config: `~/.claude.json`
 
 **Config format:**
