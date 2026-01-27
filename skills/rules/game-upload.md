@@ -54,4 +54,4 @@ When uploading images for games, convert them to base64 first using the provided
 
 ## How to use in the MCP `register_game` and `update_game` methods
 
-The `register_game` and `update_game` methods accept a `base64Image` parameter for uploading game iamges. Check the authentication status of the user with the [auth/setup](auth/setup.md) skill and script. If they are not authenticated, start the callback server and instruct the user to authenticate. Once authenticated, they can re-authenticate with the MCP server and you can start the upload process.
+The `register_game` and `update_game` methods accept a `base64Image` parameter for uploading game images. Check the authentication status of the user with the [auth/setup](auth/setup.md) skill and script. If they are not authenticated, start the callback server and instruct the user to authenticate. Once authenticated, they can re-authenticate with the MCP server and you can start the upload process.
