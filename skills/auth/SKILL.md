@@ -16,8 +16,6 @@ Use this skill when:
 Users need a Play.fun account with creator credentials:
 
 1. Go to https://app.play.fun and sign in
-2. Navigate to **Creator Dashboard** > **Creator Credentials**
-3. Generate or copy existing API credentials
 
 ## Authentication Methods
 
