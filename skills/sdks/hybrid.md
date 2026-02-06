@@ -58,14 +58,14 @@ The Hybrid approach combines the **Server SDK** for secure point submission with
 Install the Server SDK:
 
 ```bash
-npm install @playfun/server-sdk
+npm install @playdotfun/server-sdk
 ```
 
 Create your score submission endpoint:
 
 ```typescript
 import express from 'express';
-import { OpenGameClient } from '@playfun/server-sdk';
+import { OpenGameClient } from '@playdotfun/server-sdk';
 
 const app = express();
 app.use(express.json());

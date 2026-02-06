@@ -17,7 +17,7 @@ metadata:
 ## Installation (npm)
 
 ```bash
-npm install @playfun/game-sdk
+npm install @playdotfun/game-sdk
 ```
 
 ## Basic Setup

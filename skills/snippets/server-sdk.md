@@ -10,13 +10,13 @@ metadata:
 ## Installation
 
 ```bash
-npm install @playfun/server-sdk
+npm install @playdotfun/server-sdk
 ```
 
 ## Initialize Client
 
 ```typescript
-import { PlayFunClient } from '@playfun/server-sdk';
+import { PlayFunClient } from '@playdotfun/server-sdk';
 
 const client = new PlayFunClient({
   apiKey: process.env.PLAYFUN_API_KEY!,
@@ -91,7 +91,7 @@ leaderboard.forEach((entry, index) => {
 
 ```typescript
 import express from 'express';
-import { PlayFunClient } from '@playfun/server-sdk';
+import { PlayFunClient } from '@playdotfun/server-sdk';
 
 const app = express();
 app.use(express.json());
@@ -145,7 +145,7 @@ app.listen(3000, () => console.log('Server running on port 3000'));
 ```typescript
 // app/api/submit-score/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { PlayFunClient } from '@playfun/server-sdk';
+import { PlayFunClient } from '@playdotfun/server-sdk';
 
 const client = new PlayFunClient({
   apiKey: process.env.PLAYFUN_API_KEY!,
@@ -172,7 +172,7 @@ export async function POST(request: NextRequest) {
 ## Session-Based Validation
 
 ```typescript
-import { PlayFunClient } from '@playfun/server-sdk';
+import { PlayFunClient } from '@playdotfun/server-sdk';
 
 const client = new PlayFunClient({
   apiKey: process.env.PLAYFUN_API_KEY!,
@@ -243,7 +243,7 @@ async function submitScore(
 ## Error Handling
 
 ```typescript
-import { PlayFunClient } from '@playfun/server-sdk';
+import { PlayFunClient } from '@playdotfun/server-sdk';
 
 const client = new PlayFunClient({
   apiKey: process.env.PLAYFUN_API_KEY!,

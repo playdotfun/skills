@@ -37,7 +37,7 @@ Browser Game → Vanilla SDK → Play.fun API (no server-side validation)
 ### npm
 
 ```bash
-npm install @playfun/game-sdk
+npm install @playdotfun/game-sdk
 ```
 
 ## Basic Usage

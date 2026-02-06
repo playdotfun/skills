@@ -7,7 +7,7 @@ metadata:
 
 ## Overview
 
-The Server SDK (`@playfun/server-sdk`) is the **recommended** way to integrate with Play.fun for production games. It handles HMAC authentication automatically and provides secure server-side point tracking.
+The Server SDK (`@playdotfun/server-sdk`) is the **recommended** way to integrate with Play.fun for production games. It handles HMAC authentication automatically and provides secure server-side point tracking.
 
 ## When to Use
 
@@ -27,7 +27,7 @@ Browser Game → Your Server (validates) → Server SDK → Play.fun API
 ## Installation
 
 ```bash
-npm install @playfun/server-sdk
+npm install @playdotfun/server-sdk
 ```
 
 ## Initialize Client

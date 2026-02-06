@@ -53,7 +53,7 @@ npx skills add OpusGameLabs/skills
 ### Server SDK (Recommended)
 
 ```typescript
-import { PlayFunClient } from '@playfun/server-sdk';
+import { PlayFunClient } from '@playdotfun/server-sdk';
 
 const client = new PlayFunClient({
   apiKey: process.env.PLAYFUN_API_KEY!,
