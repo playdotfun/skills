@@ -126,7 +126,8 @@ Add the Browser SDK for the widget:
 <html>
   <head>
     <title>My Game</title>
-    <script src="https://sdk.play.fun/latest"></script>
+    <meta name="x-ogp-key" content="YOUR_API_KEY" />
+    <script src="https://sdk.play.fun"></script>
   </head>
   <body>
     <div id="game-container"></div>
@@ -134,11 +135,11 @@ Add the Browser SDK for the widget:
     <script>
       // SDK for widget display only - NOT for point submission
       const sdk = new OpenGameSDK({
-        gameId: 'your-game-uuid',
         ui: { usePointsWidget: true },
+        logLevel: 1,
       });
 
-      await sdk.init();
+      await sdk.init({ gameId: 'your-game-uuid' });
 
       // Your game logic here...
       let currentSessionId = generateSessionId();
@@ -163,8 +164,8 @@ Add the Browser SDK for the widget:
       }
 
       function getCurrentPlayerId() {
-        // Return the player's unique identifier
-        // This could come from wallet address, game account, etc.
+        // Use sdk.playerId after login (Privy ID), or fallback
+        if (sdk.playerId) return sdk.playerId;
         return localStorage.getItem('playerId') || generatePlayerId();
       }
 
@@ -188,7 +189,7 @@ Add the Browser SDK for the widget:
 
 ```typescript
 import express from 'express';
-import { OpenGameClient } from '@opusgamelabs/server-sdk';
+import { OpenGameClient } from '@playdotfun/server-sdk';
 
 const app = express();
 app.use(express.json());
@@ -263,7 +264,8 @@ app.listen(3000);
 <html>
   <head>
     <title>My Hybrid Game</title>
-    <script src="https://cdn.play.fun/sdk/latest/game-sdk.min.js"></script>
+    <meta name="x-ogp-key" content="YOUR_API_KEY" />
+    <script src="https://sdk.play.fun"></script>
   </head>
   <body>
     <h1>Click Game</h1>
@@ -274,8 +276,8 @@ app.listen(3000);
 
     <script>
       const sdk = new OpenGameSDK({
-        gameId: 'your-game-uuid',
         ui: { usePointsWidget: true },
+        logLevel: 1,
       });
 
       let playerId = localStorage.getItem('playerId');
@@ -287,7 +289,7 @@ app.listen(3000);
       let sessionId = null;
       let score = 0;
 
-      sdk.init();
+      sdk.init({ gameId: 'your-game-uuid' });
 
       document.getElementById('start-btn').onclick = async () => {
         const res = await fetch('/api/start-session', {

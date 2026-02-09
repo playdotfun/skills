@@ -7,7 +7,7 @@ metadata:
 
 ## Overview
 
-The Browser SDK (`@opusgamelabs/game-sdk`) provides client-side integration for Play.fun games. It includes a points widget and simple API for tracking gameplay.
+The Browser SDK (`@playdotfun/game-sdk`) provides client-side integration for Play.fun games. It includes a points widget and simple API for tracking gameplay.
 
 ## When to Use
 
@@ -23,7 +23,7 @@ The Browser SDK (`@opusgamelabs/game-sdk`) provides client-side integration for 
 ## Architecture
 
 ```
-Browser Game → Vanilla SDK → Play.fun API (no server-side validation)
+Browser Game → OpenGame SDK → Play.fun API (no server-side validation)
 ```
 
 ## Installation
@@ -31,7 +31,8 @@ Browser Game → Vanilla SDK → Play.fun API (no server-side validation)
 ### CDN (Recommended for simple games)
 
 ```html
-<script src="https://sdk.play.fun/latest"></script>
+<meta name="x-ogp-key" content="YOUR_API_KEY" />
+<script src="https://sdk.play.fun"></script>
 ```
 
 ### npm
@@ -43,30 +44,50 @@ npm install @playdotfun/game-sdk
 ## Basic Usage
 
 ```javascript
-// Initialize SDK
-const sdk = new OpenGameSDK({
-  gameId: 'your-game-uuid',
-});
+// Initialize SDK with typeof guard (game works even if SDK fails to load)
+let sdk = null;
+let sdkReady = false;
 
-await sdk.init();
-console.log('SDK ready!');
+if (typeof OpenGameSDK !== 'undefined') {
+  sdk = new OpenGameSDK({
+    ui: { usePointsWidget: true },
+    logLevel: 1, // 0 none, 1 errors, 2 warnings, 3 info
+  });
 
-// Add points during gameplay (cached locally)
-sdk.addPoints(100);
+  sdk.on('OnReady', () => {
+    sdkReady = true;
+    console.log('SDK ready!');
+  });
 
-// Save points to server
-await sdk.savePoints();
+  sdk.on('SavePointsSuccess', () => console.log('Score saved!'));
+  sdk.on('SavePointsFailed', () => console.log('Save failed'));
+
+  sdk.init({ gameId: 'your-game-uuid' });
+}
+
+// Add points during gameplay (always check ready state)
+if (sdk && sdkReady) {
+  sdk.addPoints(100);
+}
+
+// Save score to server at game over (triggers auto-login if needed)
+if (sdk && sdkReady) {
+  await sdk.savePoints(totalScore);
+}
 ```
 
 ## Configuration Options
 
 ```javascript
 const sdk = new OpenGameSDK({
-  gameId: 'your-game-uuid',
   ui: {
     usePointsWidget: true, // Show Play.fun points widget
+    theme: 'dark',         // 'dark' or 'light'
   },
+  logLevel: 1, // 0 none, 1 errors, 2 warnings, 3 info
 });
+
+sdk.init({ gameId: 'your-game-uuid' });
 ```
 
 ## Events
@@ -76,12 +97,20 @@ sdk.on('OnReady', () => {
   console.log('SDK initialized and ready');
 });
 
-sdk.on('pointsSynced', (points) => {
-  console.log('Points saved to server:', points);
+sdk.on('SessionStarted', () => {
+  console.log('Game session started');
 });
 
-sdk.on('error', (err) => {
-  console.error('SDK error:', err);
+sdk.on('SavePointsSuccess', () => {
+  console.log('Points saved to server');
+});
+
+sdk.on('SavePointsFailed', (err) => {
+  console.error('Failed to save points:', err);
+});
+
+sdk.on('LoginSuccess', () => {
+  console.log('Player logged in, ID:', sdk.playerId);
 });
 ```
 
@@ -92,7 +121,8 @@ sdk.on('error', (err) => {
 <html>
   <head>
     <title>My Simple Game</title>
-    <script src="https://sdk.play.fun/latest"></script>
+    <meta name="x-ogp-key" content="YOUR_API_KEY" />
+    <script src="https://sdk.play.fun"></script>
   </head>
   <body>
     <h1>Click the Button!</h1>
@@ -101,30 +131,43 @@ sdk.on('error', (err) => {
 
     <script>
       let totalPoints = 0;
+      let sdk = null;
+      let sdkReady = false;
 
-      const sdk = new OpenGameSDK({
-        gameId: 'your-game-uuid',
-        ui: { usePointsWidget: true },
-      });
+      // Guard against SDK load failure - game still works without it
+      if (typeof OpenGameSDK !== 'undefined') {
+        sdk = new OpenGameSDK({
+          ui: { usePointsWidget: true },
+          logLevel: 1,
+        });
 
-      sdk.init().then(() => {
-        console.log('SDK ready!');
+        sdk.on('OnReady', () => {
+          sdkReady = true;
+          console.log('SDK ready!');
+        });
 
-        document.getElementById('click-btn').onclick = () => {
-          totalPoints += 10;
-          document.getElementById('points').textContent = totalPoints;
-          sdk.addPoints(10);
-        };
-      });
+        sdk.on('SavePointsSuccess', () => console.log('Score saved!'));
+        sdk.on('SavePointsFailed', () => console.log('Save failed'));
+
+        sdk.init({ gameId: 'your-game-uuid' });
+      }
+
+      document.getElementById('click-btn').onclick = () => {
+        totalPoints += 10;
+        document.getElementById('points').textContent = totalPoints;
+        if (sdk && sdkReady) sdk.addPoints(10);
+      };
 
       // Auto-save every 30 seconds
       setInterval(() => {
-        sdk.savePoints();
+        if (sdk && sdkReady && totalPoints > 0) {
+          sdk.savePoints(totalPoints);
+        }
       }, 30000);
 
       // Save on page unload
       window.addEventListener('beforeunload', () => {
-        sdk.savePoints();
+        if (sdk && sdkReady) sdk.savePoints(totalPoints);
       });
     </script>
   </body>
@@ -144,9 +187,18 @@ Enable it with:
 
 ```javascript
 const sdk = new OpenGameSDK({
-  gameId: 'your-game-uuid',
   ui: { usePointsWidget: true },
 });
+
+sdk.init({ gameId: 'your-game-uuid' });
+```
+
+## UI Methods
+
+```javascript
+sdk.ui.showPoints();         // Show the points widget
+sdk.ui.hidePoints();         // Hide the points widget
+sdk.ui.setTheme('dark');     // Toggle 'light' or 'dark' theme
 ```
 
 ## API Reference
@@ -155,36 +207,74 @@ const sdk = new OpenGameSDK({
 
 Creates a new SDK instance.
 
-| Option               | Type    | Description                 |
-| -------------------- | ------- | --------------------------- |
-| `gameId`             | string  | Your game's UUID (required) |
-| `ui.usePointsWidget` | boolean | Show the points widget      |
+| Option               | Type    | Description                                    |
+| -------------------- | ------- | ---------------------------------------------- |
+| `ui.usePointsWidget` | boolean | Show the points widget                         |
+| `ui.theme`           | string  | Widget theme: `'dark'` or `'light'`            |
+| `logLevel`           | number  | 0 none, 1 errors, 2 warnings, 3 info          |
 
-### `sdk.init()`
+### `sdk.init({ gameId })`
 
-Initialize the SDK. Returns a Promise.
+Initialize the SDK with your game ID. Returns a Promise.
 
-### `sdk.addPoints(points)`
+### `sdk.addPoints(amount)`
 
-Add points to local cache. Points are not sent to the server until `savePoints()` is called.
+Update the points widget display during gameplay. Points are visual until `savePoints()` is called.
 
-### `sdk.savePoints()`
+### `sdk.savePoints(score)`
 
-Save cached points to the Play.fun server. Returns a Promise.
+Save the score to the Play.fun server. Triggers auto-login if the player is not authenticated. Returns a Promise.
+
+### `sdk.getPoints()`
+
+Retrieve the player's current points from the server.
+
+### `sdk.login()` / `sdk.logout()`
+
+Manual authentication control.
+
+### `sdk.claimRewards(showModal?)`
+
+Open the rewards claiming flow.
+
+### `sdk.listPlayerRewards()`
+
+Fetch available rewards for the player.
+
+### `sdk.getTimeUntilNextClaim()`
+
+Get the cooldown time until the next reward claim.
+
+### `sdk.playerId`
+
+After login, this contains the player's Privy ID. Use it as the canonical user key for backend identification.
 
 ### `sdk.on(event, callback)`
 
 Listen for SDK events.
 
-| Event          | Description            |
-| -------------- | ---------------------- |
-| `OnReady`      | SDK initialized        |
-| `pointsSynced` | Points saved to server |
-| `error`        | An error occurred      |
+| Event                  | Description                          |
+| ---------------------- | ------------------------------------ |
+| `OnReady`              | SDK initialized                      |
+| `SessionStarted`       | Game session started                 |
+| `SessionFailed`        | Session failed to start              |
+| `LoginRequest`         | Login flow initiated                 |
+| `LoginSuccess`         | Player logged in successfully        |
+| `LoginFailed`          | Login failed                         |
+| `LoginCancelled`       | Player cancelled login               |
+| `Logout`               | Player logged out                    |
+| `SavePointsSuccess`    | Points saved to server               |
+| `SavePointsFailed`     | Points save failed                   |
+| `SavePointsCancelled`  | Points save cancelled                |
+| `ClaimRequest`         | Reward claim initiated               |
+| `ClaimSuccess`         | Reward claimed successfully          |
+| `ClaimFailure`         | Reward claim failed                  |
+| `ClaimCancelled`       | Reward claim cancelled               |
 
 ## Important Notes
 
 - **No server-side validation**: Points are submitted directly from the browser
 - **Vulnerable to cheating**: Users can manipulate point submissions
 - **Use for prototypes only**: For production games, use the Server SDK
-- **Save frequently**: Call `savePoints()` periodically to avoid losing progress
+- **Auto-login on save**: `savePoints()` triggers login if the player isn't authenticated
+- **Player ID**: After login, `sdk.playerId` provides the player's Privy ID

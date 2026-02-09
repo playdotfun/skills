@@ -53,11 +53,11 @@ npx skills add OpusGameLabs/skills
 ### Server SDK (Recommended)
 
 ```typescript
-import { PlayFunClient } from '@playdotfun/server-sdk';
+import { OpenGameClient } from '@playdotfun/server-sdk';
 
-const client = new PlayFunClient({
-  apiKey: process.env.PLAYFUN_API_KEY!,
-  secretKey: process.env.PLAYFUN_SECRET_KEY!,
+const client = new OpenGameClient({
+  apiKey: process.env.OGP_API_KEY!,
+  secretKey: process.env.OGP_API_SECRET_KEY!,
 });
 
 await client.play.savePoints({
@@ -70,16 +70,33 @@ await client.play.savePoints({
 ### Browser SDK (Prototypes)
 
 ```html
-<script src="https://sdk.play.fun/latest"></script>
+<meta name="x-ogp-key" content="YOUR_API_KEY" />
+<script src="https://sdk.play.fun"></script>
 <script>
-  const sdk = new PlayFunSDK({
-    gameId: 'your-game-uuid',
-    ui: { usePointsWidget: true },
-  });
+  let sdk = null;
+  let sdkReady = false;
 
-  await sdk.init();
-  sdk.addPoints(10);
-  await sdk.savePoints();
+  if (typeof OpenGameSDK !== 'undefined') {
+    sdk = new OpenGameSDK({
+      ui: { usePointsWidget: true },
+      logLevel: 1,
+    });
+
+    sdk.on('OnReady', () => {
+      sdkReady = true;
+    });
+
+    sdk.on('SavePointsSuccess', () => console.log('Saved!'));
+    sdk.on('SavePointsFailed', () => console.log('Failed'));
+
+    sdk.init({ gameId: 'your-game-uuid' });
+  }
+
+  // During gameplay:
+  // if (sdk && sdkReady) sdk.addPoints(10);
+  //
+  // At game over:
+  // if (sdk && sdkReady) sdk.savePoints(totalScore);
 </script>
 ```
 

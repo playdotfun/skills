@@ -16,11 +16,11 @@ npm install @playdotfun/server-sdk
 ## Initialize Client
 
 ```typescript
-import { PlayFunClient } from '@playdotfun/server-sdk';
+import { OpenGameClient } from '@playdotfun/server-sdk';
 
-const client = new PlayFunClient({
-  apiKey: process.env.PLAYFUN_API_KEY!,
-  secretKey: process.env.PLAYFUN_SECRET_KEY!,
+const client = new OpenGameClient({
+  apiKey: process.env.OGP_API_KEY!,
+  secretKey: process.env.OGP_API_SECRET_KEY!,
 });
 ```
 
@@ -91,14 +91,14 @@ leaderboard.forEach((entry, index) => {
 
 ```typescript
 import express from 'express';
-import { PlayFunClient } from '@playdotfun/server-sdk';
+import { OpenGameClient } from '@playdotfun/server-sdk';
 
 const app = express();
 app.use(express.json());
 
-const client = new PlayFunClient({
-  apiKey: process.env.PLAYFUN_API_KEY!,
-  secretKey: process.env.PLAYFUN_SECRET_KEY!,
+const client = new OpenGameClient({
+  apiKey: process.env.OGP_API_KEY!,
+  secretKey: process.env.OGP_API_SECRET_KEY!,
 });
 
 const GAME_ID = process.env.GAME_ID!;
@@ -145,11 +145,11 @@ app.listen(3000, () => console.log('Server running on port 3000'));
 ```typescript
 // app/api/submit-score/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { PlayFunClient } from '@playdotfun/server-sdk';
+import { OpenGameClient } from '@playdotfun/server-sdk';
 
-const client = new PlayFunClient({
-  apiKey: process.env.PLAYFUN_API_KEY!,
-  secretKey: process.env.PLAYFUN_SECRET_KEY!,
+const client = new OpenGameClient({
+  apiKey: process.env.OGP_API_KEY!,
+  secretKey: process.env.OGP_API_SECRET_KEY!,
 });
 
 export async function POST(request: NextRequest) {
@@ -172,11 +172,11 @@ export async function POST(request: NextRequest) {
 ## Session-Based Validation
 
 ```typescript
-import { PlayFunClient } from '@playdotfun/server-sdk';
+import { OpenGameClient } from '@playdotfun/server-sdk';
 
-const client = new PlayFunClient({
-  apiKey: process.env.PLAYFUN_API_KEY!,
-  secretKey: process.env.PLAYFUN_SECRET_KEY!,
+const client = new OpenGameClient({
+  apiKey: process.env.OGP_API_KEY!,
+  secretKey: process.env.OGP_API_SECRET_KEY!,
 });
 
 // In-memory session store (use Redis in production)
@@ -243,11 +243,11 @@ async function submitScore(
 ## Error Handling
 
 ```typescript
-import { PlayFunClient } from '@playdotfun/server-sdk';
+import { OpenGameClient } from '@playdotfun/server-sdk';
 
-const client = new PlayFunClient({
-  apiKey: process.env.PLAYFUN_API_KEY!,
-  secretKey: process.env.PLAYFUN_SECRET_KEY!,
+const client = new OpenGameClient({
+  apiKey: process.env.OGP_API_KEY!,
+  secretKey: process.env.OGP_API_SECRET_KEY!,
 });
 
 async function savePointsWithRetry(

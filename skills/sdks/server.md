@@ -33,7 +33,7 @@ npm install @playdotfun/server-sdk
 ## Initialize Client
 
 ```typescript
-import { OpenGameClient } from '@opusgamelabs/server-sdk';
+import { OpenGameClient } from '@playdotfun/server-sdk';
 
 const client = new OpenGameClient({
   apiKey: process.env.OGP_API_KEY!,
@@ -137,7 +137,7 @@ const user = await client.users.me();
 
 ```typescript
 import express from 'express';
-import { OpenGameClient } from '@opusgamelabs/server-sdk';
+import { OpenGameClient } from '@playdotfun/server-sdk';
 
 const app = express();
 app.use(express.json());
