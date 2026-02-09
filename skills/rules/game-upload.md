@@ -38,15 +38,13 @@ When uploading images for games, convert them to base64 first using the provided
 
 ## Best Practices
 
-1. **Keep images 256x256 pixels or smaller** — Larger images (512x512+) can fail to process during registration. Resize before converting to base64
-2. **Optimize images before converting** — Use tools like `optipng`, `jpegoptim`, or `cwebp` to reduce file size
-3. **Use appropriate formats**:
+1. **Optimize images before converting** - Use tools like `optipng`, `jpegoptim`, or `cwebp` to reduce file size
+2. **Use appropriate formats**:
    - PNG for images with transparency
    - WebP for best compression (when supported)
    - JPEG for photographs without transparency
-4. **Check encoded size** — Base64 increases file size by ~33%. The script reports both original and encoded sizes
-5. **Square images for tokens** — Playcoin icons should be square (1:1 aspect ratio)
-6. **Prefer manual base64 encoding** — The `image-to-base64.sh` script outputs base64 to stdout, which AI tools may interpret as image data rather than text. If that happens, use `base64 -i <file> | tr -d '\n'` directly instead
+3. **Check encoded size** - Base64 increases file size by ~33%. The script reports both original and encoded sizes
+4. **Square images for tokens** - Playcoin icons should be square (1:1 aspect ratio)
 
 ## Workflow
 

@@ -10,7 +10,7 @@ metadata:
 ## Installation (CDN)
 
 ```html
-<meta name="x-ogp-key" content="YOUR_API_KEY" />
+<meta name="x-ogp-key" content="YOUR_CREATOR_ID" id="ogp-key-meta" />
 <script src="https://sdk.play.fun"></script>
 ```
 
@@ -106,7 +106,7 @@ sdk.on('LoginSuccess', () => {
 <html>
   <head>
     <title>Clicker Game</title>
-    <meta name="x-ogp-key" content="YOUR_API_KEY" />
+    <meta name="x-ogp-key" content="YOUR_CREATOR_ID" id="ogp-key-meta" />
     <script src="https://sdk.play.fun"></script>
     <style>
       body {
@@ -175,7 +175,7 @@ sdk.on('LoginSuccess', () => {
 <html>
   <head>
     <title>Canvas Game</title>
-    <meta name="x-ogp-key" content="YOUR_API_KEY" />
+    <meta name="x-ogp-key" content="YOUR_CREATOR_ID" id="ogp-key-meta" />
     <script src="https://sdk.play.fun"></script>
   </head>
   <body>
@@ -262,7 +262,7 @@ export function usePlayFun(gameId: string) {
     // Load SDK script
     const meta = document.createElement('meta');
     meta.name = 'x-ogp-key';
-    meta.content = 'YOUR_API_KEY';
+    meta.content = 'YOUR_CREATOR_ID';
     document.head.appendChild(meta);
 
     const script = document.createElement('script');

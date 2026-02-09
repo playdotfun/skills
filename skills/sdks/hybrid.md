@@ -126,7 +126,7 @@ Add the Browser SDK for the widget:
 <html>
   <head>
     <title>My Game</title>
-    <meta name="x-ogp-key" content="YOUR_API_KEY" />
+    <meta name="x-ogp-key" content="YOUR_CREATOR_ID" id="ogp-key-meta" />
     <script src="https://sdk.play.fun"></script>
   </head>
   <body>
@@ -264,7 +264,7 @@ app.listen(3000);
 <html>
   <head>
     <title>My Hybrid Game</title>
-    <meta name="x-ogp-key" content="YOUR_API_KEY" />
+    <meta name="x-ogp-key" content="YOUR_CREATOR_ID" id="ogp-key-meta" />
     <script src="https://sdk.play.fun"></script>
   </head>
   <body>

@@ -31,7 +31,7 @@ Browser Game → OpenGame SDK → Play.fun API (no server-side validation)
 ### CDN (Recommended for simple games)
 
 ```html
-<meta name="x-ogp-key" content="YOUR_API_KEY" />
+<meta name="x-ogp-key" content="YOUR_CREATOR_ID" id="ogp-key-meta" />
 <script src="https://sdk.play.fun"></script>
 ```
 
@@ -121,7 +121,7 @@ sdk.on('LoginSuccess', () => {
 <html>
   <head>
     <title>My Simple Game</title>
-    <meta name="x-ogp-key" content="YOUR_API_KEY" />
+    <meta name="x-ogp-key" content="YOUR_CREATOR_ID" id="ogp-key-meta" />
     <script src="https://sdk.play.fun"></script>
   </head>
   <body>
