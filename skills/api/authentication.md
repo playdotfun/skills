@@ -65,7 +65,7 @@ Authorization: HMAC-SHA256 apiKey=<your-api-key>, signature=<signature>, timesta
 const timestamp = Math.floor(Date.now() / 1000);
 const signature = generateSignature(secretKey, 'GET', '/games/me', timestamp);
 
-const response = await fetch('https://api.opengameprotocol.com/games/me', {
+const response = await fetch('https://api.play.fun/games/me', {
   headers: {
     Authorization: `HMAC-SHA256 apiKey=${apiKey}, signature=${signature}, timestamp=${timestamp}`,
     'Content-Type': 'application/json',
@@ -136,7 +136,7 @@ When using the Play.fun MCP server, pass credentials as headers:
 ```
 x-api-key: your-api-key
 x-secret-key: your-secret-key
-x-base-url: https://api.opengameprotocol.com (optional)
+x-base-url: https://api.play.fun (optional)
 ```
 
 ## Security Best Practices

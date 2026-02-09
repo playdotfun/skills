@@ -7,7 +7,7 @@ metadata:
 
 ## Base URL
 
-- **Production**: `https://api.opengameprotocol.com`
+- **Production**: `https://api.play.fun`
 - **Interactive Docs**: [https://api.play.fun/api-reference](https://api.play.fun/api-reference)
 
 All authenticated endpoints require HMAC-SHA256 authentication (see [Authentication](../rules/api-authentication.md)).
