@@ -9,7 +9,7 @@ Play.fun is a platform for integrating games with Web3 rewards. Games can regist
 ## Installation
 
 ```bash
-npx skills add OpusGameLabs/skills
+npx skills add playdotfun/skills
 ```
 
 ## Skill Contents

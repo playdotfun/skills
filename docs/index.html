@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Play.fun Skills for Claude Code</title>
+  <meta name="description" content="Claude Code skills plugin for integrating games with the Play.fun ecosystem. SDKs, API references, templates, and MCP tools.">
+  <meta property="og:title" content="Play.fun Skills for Claude Code">
+  <meta property="og:description" content="Ship games with Web3 rewards. SDK references, code snippets, and MCP tools — all inside Claude Code.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://playdotfun.github.io/skills/">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0a0a0a;
+      --surface: #141414;
+      --border: #222;
+      --text: #e8e8e8;
+      --muted: #888;
+      --red: #FD0709;
+      --red-dim: #CD0000;
+      --gold: #E9B967;
+      --cream: #FEFDCB;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: var(--red); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+
+    /* Hero */
+    .hero {
+      text-align: center;
+      padding: 80px 0 60px;
+    }
+
+    .hero-logo {
+      width: 80px;
+      height: 67px;
+      margin-bottom: 24px;
+    }
+
+    .hero h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      margin-bottom: 8px;
+    }
+
+    .hero h1 span { color: var(--red); }
+
+    .hero .subtitle {
+      font-size: 1.15rem;
+      color: var(--muted);
+      max-width: 520px;
+      margin: 0 auto 32px;
+    }
+
+    /* Install box */
+    .install-box {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 20px;
+      font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+
+    .install-box:hover { border-color: var(--red); }
+
+    .install-box .prompt { color: var(--muted); user-select: none; }
+    .install-box .cmd { color: var(--text); }
+
+    .install-box .copy-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 2px;
+      transition: color 0.2s;
+    }
+    .install-box .copy-btn:hover { color: var(--text); }
+
+    .install-hint {
+      margin-top: 12px;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    /* Section */
+    section { padding: 60px 0; }
+
+    section h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      letter-spacing: -0.02em;
+    }
+
+    section .section-sub {
+      color: var(--muted);
+      margin-bottom: 32px;
+    }
+
+    /* Feature grid */
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .feature {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px;
+      transition: border-color 0.2s;
+    }
+
+    .feature:hover { border-color: #333; }
+
+    .feature-icon {
+      font-size: 1.5rem;
+      margin-bottom: 12px;
+      display: block;
+      width: 40px;
+      height: 40px;
+      line-height: 40px;
+      text-align: center;
+      background: #1a1a1a;
+      border-radius: 8px;
+    }
+
+    .feature h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .feature p {
+      font-size: 0.875rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    /* SDK table */
+    .sdk-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    .sdk-table th {
+      text-align: left;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      color: var(--muted);
+      font-weight: 500;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .sdk-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sdk-table tr:last-child td { border-bottom: none; }
+
+    .badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .badge-rec { background: rgba(253, 7, 9, 0.15); color: var(--red); }
+    .badge-proto { background: rgba(233, 185, 103, 0.15); color: var(--gold); }
+
+    /* Code block */
+    .code-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 24px;
+    }
+
+    .code-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .code-tab {
+      padding: 10px 20px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: color 0.2s, border-color 0.2s;
+      background: none;
+      border-top: none;
+      border-left: none;
+      border-right: none;
+    }
+
+    .code-tab:hover { color: var(--text); }
+    .code-tab.active { color: var(--text); border-bottom-color: var(--red); }
+
+    .code-panel { display: none; }
+    .code-panel.active { display: block; }
+
+    .code-block pre {
+      padding: 20px 24px;
+      overflow-x: auto;
+      font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+      font-size: 0.85rem;
+      line-height: 1.7;
+      color: var(--muted);
+    }
+
+    .code-block pre .kw { color: var(--red); }
+    .code-block pre .str { color: var(--gold); }
+    .code-block pre .fn { color: #7eb8da; }
+    .code-block pre .cm { color: #555; }
+    .code-block pre .vr { color: var(--text); }
+
+    /* What's inside */
+    .contents-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+    }
+
+    .contents-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.875rem;
+      transition: border-color 0.2s;
+    }
+
+    .contents-item:hover { border-color: #333; }
+
+    .contents-item .icon {
+      width: 32px;
+      height: 32px;
+      line-height: 32px;
+      text-align: center;
+      background: #1a1a1a;
+      border-radius: 6px;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+
+    /* Footer */
+    footer {
+      padding: 40px 0;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    footer a { color: var(--muted); }
+    footer a:hover { color: var(--text); }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin-bottom: 12px;
+    }
+
+    /* Divider */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 0;
+    }
+
+    @media (max-width: 600px) {
+      .hero { padding: 60px 0 40px; }
+      .hero h1 { font-size: 1.75rem; }
+      .install-box { font-size: 0.8rem; padding: 10px 14px; }
+      section { padding: 40px 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Hero -->
+  <div class="container">
+    <div class="hero">
+      <svg class="hero-logo" viewBox="0 0 281 236" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0.00384614 125.081C-0.369459 156.066 26.5189 170.008 42.7087 173.898C44.6022 174.353 45.9991 176 45.9382 177.947C45.6246 187.955 44.6749 202.596 54.5039 213.581C63.004 223.081 86.5039 235.081 138.004 235.581C189.504 236.081 219.037 225.529 231.004 206.581C236.446 197.965 235.815 188.114 234.817 177.776C234.636 175.909 235.777 174.172 237.55 173.559C259.081 166.109 275.682 155.311 279.504 128.081C283.785 97.5812 265.504 66.5812 240.004 41.0812C216.504 17.5812 185.004 1.58117 141.004 0.0811727C97.0039 -1.41883 59.0039 18.0812 36.0039 41.0812C13.0039 64.0812 0.437581 89.0812 0.00384614 125.081Z" fill="black"/>
+        <path d="M42.5042 145.581C42.8393 148.597 47.4085 151.823 50.7443 153.673C51.6955 154.2 52.1042 155.381 51.6178 156.354C51.2499 157.089 50.4537 157.519 49.643 157.38C30.4828 154.1 19.4811 133.249 18.504 119.081C17.504 104.581 20.504 82.0812 41.004 57.0812C61.504 32.0812 90.504 16.0811 135.004 13.5811C179.504 11.0811 222.504 36.0811 241.004 60.5811C259.504 85.0811 264.504 109.581 259.504 130.581C255.792 146.17 240.314 154.641 231.444 157.512C230.259 157.896 228.763 157.327 228.365 156.146C227.776 154.401 229.536 153.163 231.294 152.613C232.823 152.135 234.096 151.291 235.004 150.081C236.504 148.081 235.754 142.581 230.504 139.081C225.254 135.581 201.004 117.081 136.504 117.081C63.505 117.081 42.0042 141.081 42.5042 145.581Z" fill="#FD0709"/>
+        <path d="M60.504 91.5797C59.5038 100.581 54.0039 108.581 44.0039 109.081C39.0039 109.081 33.504 107.08 34.504 96.5797C35.504 86.0797 43.004 79.0798 50.004 78.0798C57.004 77.0798 61.5043 82.5782 60.504 91.5797Z" fill="#D9D9D9"/>
+        <path d="M90.5038 84.0797C68.5038 84.5797 63.0038 71.0797 63.0038 61.0797C63.0038 55.8635 66.5038 45.9927 77.5038 37.5811C88.5038 29.1695 103.504 23.5653 115.004 22.0813C126.504 20.5974 142.504 22.5827 142.504 42.5812C142.504 64.5827 115.504 83.5115 90.5038 84.0797Z" fill="#D9D9D9"/>
+        <path d="M221.504 93.0812C206.004 89.0812 197.504 74.0812 197.504 64.0812C197.504 54.0812 206.504 46.5812 223.504 55.5812C240.504 64.5812 242.004 79.5812 241.504 84.0797C241.004 88.5782 237.004 97.0812 221.504 93.0812Z" fill="#D9D9D9"/>
+        <path d="M25.0038 115.581C23.6146 110.025 24.0038 93.7476 25.0038 86.0809C22.5038 93.4142 17.1117 112.01 21.5039 127.581C27.0043 147.081 45.2361 155.228 47.0039 155.581C49.5039 156.081 51.8675 156.013 49.0039 154.581C45.0039 152.581 39.5039 147.581 40.5038 144.581C45.2411 130.366 75.2647 122.179 85.0038 120.081C117.504 113.081 161.749 114.017 190.004 121.081C218.004 128.081 225.004 133.717 229.504 136.581C233.433 139.081 237.504 143.581 237.004 148.581C236.504 153.581 228.004 153.581 229.504 155.581C231.004 157.581 248.504 151.081 255.004 137.581C262.382 122.257 259.504 104.581 257.504 96.081C256.467 91.6736 251.504 80.0809 250.004 77.5809C248.504 75.0809 248.811 76.5376 250.004 86.0809C251.504 98.0811 248.956 106.767 246.504 112.081C243.504 118.581 237.004 121.581 230.504 120.081C225.145 118.844 213.004 112.081 198.004 108.081C183.019 104.085 155.504 100.081 111.004 102.581C66.5039 105.081 40.0039 127.081 35.0039 127.581C30.0039 128.081 27.0039 123.581 25.0038 115.581Z" fill="#CD0000"/>
+        <path d="M65.5052 191.581C62.6092 182.895 65.7673 166.758 67.3399 147.664C67.4473 146.36 68.1731 145.187 69.2915 144.508C80.0298 137.99 94.3 128.581 135.004 128.581C181.416 128.581 203.987 138.398 213.566 147.183C214.189 147.754 214.577 148.528 214.7 149.364C217.465 168.176 216.603 191.884 214.504 196.081C210.503 204.081 198.755 211.481 183.005 215.081C165.505 219.081 136.004 220.081 109.004 216.581C81.0039 212.951 69.4684 203.468 65.5052 191.581Z" fill="#FEFDCB"/>
+        <path d="M77.0039 142.081L68.5039 146.581C67.3373 154.581 66.5039 172.387 66.5039 180.081C66.504 190.081 66.0039 196.081 77.0039 204.581C88.0039 213.081 112.004 217.581 139.504 217.581C157.068 217.581 186.004 215.081 199.504 207.581C208.504 202.581 213.504 198.081 215.004 190.581C216.504 183.081 214.504 172.081 213.504 151.581C213.385 149.151 211.671 147.248 211.004 146.581C210.337 148.748 210.004 153.081 209.504 158.581C209.004 164.081 209.504 187.581 200.004 198.081C189.779 209.382 171.067 213.081 139.504 213.081C110.004 213.081 85.5026 205.829 79.0039 196.081C73.0038 187.081 72.5038 173.581 73.0038 163.081C73.4081 154.591 75.5039 146.581 77.0039 142.081Z" fill="#E9B967"/>
+      </svg>
+      <h1><span>Play.fun</span> Skills</h1>
+      <p class="subtitle">Claude Code plugin for integrating games with Web3 rewards. SDKs, API reference, code snippets, and MCP tools.</p>
+      <div class="install-box" onclick="copyInstall()">
+        <span class="prompt">$</span>
+        <span class="cmd" id="install-cmd">npx skills add playdotfun/skills</span>
+        <button class="copy-btn" aria-label="Copy install command">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="5" y="5" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M11 5V3.5A1.5 1.5 0 009.5 2h-6A1.5 1.5 0 002 3.5v6A1.5 1.5 0 003.5 11H5" stroke="currentColor" stroke-width="1.5"/></svg>
+        </button>
+      </div>
+      <p class="install-hint" id="install-hint">Click to copy</p>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- Features -->
+  <section>
+    <div class="container">
+      <h2>What it does</h2>
+      <p class="section-sub">Everything you need to ship a Play.fun game, available inside your editor.</p>
+      <div class="features">
+        <div class="feature">
+          <span class="feature-icon">&#9889;</span>
+          <h3>SDK References</h3>
+          <p>Complete Server, Browser, and Hybrid SDK docs with integration patterns for Express, Next.js, React, Phaser, and vanilla JS.</p>
+        </div>
+        <div class="feature">
+          <span class="feature-icon">&#128274;</span>
+          <h3>API &amp; Auth</h3>
+          <p>Full API endpoint reference and HMAC-SHA256 authentication guide. Copy-paste examples in TypeScript, Python, and cURL.</p>
+        </div>
+        <div class="feature">
+          <span class="feature-icon">&#129302;</span>
+          <h3>MCP Tools</h3>
+          <p>30+ Model Context Protocol tools. Register games, track points, launch Playcoins, and manage leaderboards from your AI assistant.</p>
+        </div>
+        <div class="feature">
+          <span class="feature-icon">&#128187;</span>
+          <h3>Code Snippets</h3>
+          <p>Production-ready code for common scenarios. Defensive patterns, anti-cheat, session handling, and batch operations.</p>
+        </div>
+        <div class="feature">
+          <span class="feature-icon">&#128640;</span>
+          <h3>Deployment</h3>
+          <p>GitHub Pages deployment guide for free game hosting. One command to go from local game to live URL.</p>
+        </div>
+        <div class="feature">
+          <span class="feature-icon">&#127918;</span>
+          <h3>Best Practices</h3>
+          <p>Security, validation, rate limiting, and SDK selection guidance. Know when to use Server vs Browser vs Hybrid.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- SDK comparison -->
+  <section>
+    <div class="container">
+      <h2>Choose your SDK</h2>
+      <p class="section-sub">Three integration paths depending on your needs.</p>
+      <table class="sdk-table">
+        <thead>
+          <tr>
+            <th>Scenario</th>
+            <th>SDK</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Production game with token rewards</td>
+            <td>Server SDK</td>
+            <td><span class="badge badge-rec">Recommended</span></td>
+          </tr>
+          <tr>
+            <td>Anti-cheat &amp; Play.fun widget</td>
+            <td>Hybrid (Server + Browser)</td>
+            <td><span class="badge badge-rec">Recommended</span></td>
+          </tr>
+          <tr>
+            <td>Quick prototype or game jam</td>
+            <td>Browser SDK</td>
+            <td><span class="badge badge-proto">Prototype</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Code examples -->
+      <div class="code-block">
+        <div class="code-tabs">
+          <button class="code-tab active" data-panel="server">Server SDK</button>
+          <button class="code-tab" data-panel="browser">Browser SDK</button>
+        </div>
+        <div class="code-panel active" id="panel-server">
+<pre><span class="kw">import</span> <span class="vr">{ OpenGameClient }</span> <span class="kw">from</span> <span class="str">'@playdotfun/server-sdk'</span>;
+
+<span class="kw">const</span> <span class="vr">client</span> = <span class="kw">new</span> <span class="fn">OpenGameClient</span>({
+  <span class="vr">apiKey</span>: process.env.<span class="vr">OGP_API_KEY</span>,
+  <span class="vr">secretKey</span>: process.env.<span class="vr">OGP_API_SECRET_KEY</span>,
+});
+
+<span class="kw">await</span> client.play.<span class="fn">savePoints</span>({
+  <span class="vr">gameId</span>: <span class="str">'your-game-uuid'</span>,
+  <span class="vr">playerId</span>: <span class="str">'player-123'</span>,
+  <span class="vr">points</span>: <span class="vr">100</span>,
+});</pre>
+        </div>
+        <div class="code-panel" id="panel-browser">
+<pre><span class="cm">&lt;!-- Add to your HTML --&gt;</span>
+<span class="kw">&lt;meta</span> name=<span class="str">"x-ogp-key"</span> content=<span class="str">"YOUR_CREATOR_ID"</span> <span class="kw">/&gt;</span>
+<span class="kw">&lt;script</span> src=<span class="str">"https://sdk.play.fun"</span><span class="kw">&gt;&lt;/script&gt;</span>
+<span class="kw">&lt;script&gt;</span>
+  <span class="kw">const</span> <span class="vr">sdk</span> = <span class="kw">new</span> <span class="fn">OpenGameSDK</span>({
+    <span class="vr">ui</span>: { <span class="vr">usePointsWidget</span>: <span class="vr">true</span> },
+  });
+
+  sdk.<span class="fn">on</span>(<span class="str">'OnReady'</span>, () <span class="kw">=&gt;</span> console.<span class="fn">log</span>(<span class="str">'Ready!'</span>));
+  sdk.<span class="fn">init</span>({ <span class="vr">gameId</span>: <span class="str">'your-game-uuid'</span> });
+
+  <span class="cm">// During gameplay: sdk.addPoints(10)</span>
+  <span class="cm">// At game over:   sdk.savePoints(totalScore)</span>
+<span class="kw">&lt;/script&gt;</span></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- What's inside -->
+  <section>
+    <div class="container">
+      <h2>What's inside</h2>
+      <p class="section-sub">Skill files loaded into Claude Code's context when you need them.</p>
+      <div class="contents-grid">
+        <div class="contents-item"><span class="icon">&#128214;</span> API Reference</div>
+        <div class="contents-item"><span class="icon">&#128272;</span> Auth Guide</div>
+        <div class="contents-item"><span class="icon">&#9881;</span> Server SDK</div>
+        <div class="contents-item"><span class="icon">&#127760;</span> Browser SDK</div>
+        <div class="contents-item"><span class="icon">&#128260;</span> Hybrid SDK</div>
+        <div class="contents-item"><span class="icon">&#9989;</span> Best Practices</div>
+        <div class="contents-item"><span class="icon">&#128268;</span> MCP Quickstart</div>
+        <div class="contents-item"><span class="icon">&#128221;</span> Glossary</div>
+        <div class="contents-item"><span class="icon">&#128187;</span> Code Snippets</div>
+        <div class="contents-item"><span class="icon">&#128295;</span> Utility Scripts</div>
+        <div class="contents-item"><span class="icon">&#128640;</span> Deploy Guide</div>
+        <div class="contents-item"><span class="icon">&#128736;</span> Rules &amp; Guards</div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-links">
+        <a href="https://play.fun">Play.fun</a>
+        <a href="https://app.play.fun">Creator Dashboard</a>
+        <a href="https://github.com/playdotfun/skills">GitHub</a>
+        <a href="https://api.play.fun/api-reference">API Docs</a>
+      </div>
+      <p>MIT License</p>
+    </div>
+  </footer>
+
+  <script>
+    // Copy install command
+    function copyInstall() {
+      const cmd = document.getElementById('install-cmd').textContent;
+      navigator.clipboard.writeText(cmd).then(() => {
+        const hint = document.getElementById('install-hint');
+        hint.textContent = 'Copied!';
+        setTimeout(() => { hint.textContent = 'Click to copy'; }, 2000);
+      });
+    }
+
+    // Code tabs
+    document.querySelectorAll('.code-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.code-panel').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById('panel-' + tab.dataset.panel).classList.add('active');
+      });
+    });
+  </script>
+
+</body>
+</html>
