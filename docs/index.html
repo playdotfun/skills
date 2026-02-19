@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Play.fun Skills for Claude Code</title>
-  <meta name="description" content="Claude Code skills plugin for integrating games with the Play.fun ecosystem. SDKs, API references, templates, and MCP tools.">
-  <meta property="og:title" content="Play.fun Skills for Claude Code">
-  <meta property="og:description" content="Ship games with Web3 rewards. SDK references, code snippets, and MCP tools — all inside Claude Code.">
+  <title>Play.fun Skills — Monetize Your Vibecoded Games</title>
+  <meta name="description" content="Vibe code a game, monetize it instantly. Claude Code plugin that turns any AI-built game into a Play.fun game with token rewards in minutes.">
+  <meta property="og:title" content="Play.fun Skills — Monetize Your Vibecoded Games">
+  <meta property="og:description" content="Vibe code a game. Add one skill. Your players earn real token rewards. It's that easy.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://playdotfun.github.io/skills/">
   <style>
@@ -153,6 +153,48 @@
 
     .feature p {
       font-size: 0.875rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    /* Steps */
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .step {
+      display: flex;
+      align-items: flex-start;
+      gap: 20px;
+      padding: 24px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .step:last-child { border-bottom: none; }
+
+    .step-num {
+      width: 40px;
+      height: 40px;
+      min-width: 40px;
+      line-height: 40px;
+      text-align: center;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--red);
+      background: rgba(253, 7, 9, 0.1);
+      border-radius: 10px;
+    }
+
+    .step-body h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .step-body p {
+      font-size: 0.9rem;
       color: var(--muted);
       line-height: 1.5;
     }
@@ -325,8 +367,8 @@
         <path d="M65.5052 191.581C62.6092 182.895 65.7673 166.758 67.3399 147.664C67.4473 146.36 68.1731 145.187 69.2915 144.508C80.0298 137.99 94.3 128.581 135.004 128.581C181.416 128.581 203.987 138.398 213.566 147.183C214.189 147.754 214.577 148.528 214.7 149.364C217.465 168.176 216.603 191.884 214.504 196.081C210.503 204.081 198.755 211.481 183.005 215.081C165.505 219.081 136.004 220.081 109.004 216.581C81.0039 212.951 69.4684 203.468 65.5052 191.581Z" fill="#FEFDCB"/>
         <path d="M77.0039 142.081L68.5039 146.581C67.3373 154.581 66.5039 172.387 66.5039 180.081C66.504 190.081 66.0039 196.081 77.0039 204.581C88.0039 213.081 112.004 217.581 139.504 217.581C157.068 217.581 186.004 215.081 199.504 207.581C208.504 202.581 213.504 198.081 215.004 190.581C216.504 183.081 214.504 172.081 213.504 151.581C213.385 149.151 211.671 147.248 211.004 146.581C210.337 148.748 210.004 153.081 209.504 158.581C209.004 164.081 209.504 187.581 200.004 198.081C189.779 209.382 171.067 213.081 139.504 213.081C110.004 213.081 85.5026 205.829 79.0039 196.081C73.0038 187.081 72.5038 173.581 73.0038 163.081C73.4081 154.591 75.5039 146.581 77.0039 142.081Z" fill="#E9B967"/>
       </svg>
-      <h1><span>Play.fun</span> Skills</h1>
-      <p class="subtitle">Claude Code plugin for integrating games with Web3 rewards. SDKs, API reference, code snippets, and MCP tools.</p>
+      <h1>Monetize your <span>vibecoded</span> games</h1>
+      <p class="subtitle">Vibe code a game with Claude. Install one skill. Your players earn real token rewards. That's it.</p>
       <div class="install-box" onclick="copyInstall()">
         <span class="prompt">$</span>
         <span class="cmd" id="install-cmd">npx skills add playdotfun/skills</span>
@@ -340,41 +382,74 @@
 
   <hr class="divider">
 
-  <!-- Features -->
+  <!-- How it works -->
   <section>
     <div class="container">
-      <h2>What it does</h2>
-      <p class="section-sub">Everything you need to ship a Play.fun game, available inside your editor.</p>
+      <h2>Three steps to a monetized game</h2>
+      <p class="section-sub">From prompt to earning in minutes, not days.</p>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <h3>Vibe code your game</h3>
+            <p>Use Claude to build any game — a clicker, platformer, puzzle, whatever. Or bring a game you already have.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <h3>Install the skill</h3>
+            <p>One command gives Claude everything it needs — SDK docs, code snippets, deployment guides. Just say "monetize my game" and it handles the rest.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <h3>Players earn tokens</h3>
+            <p>Your game is live on Play.fun. Players earn Playcoins — real Solana tokens — just by playing. You launch a token, they earn rewards.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- Why this exists -->
+  <section>
+    <div class="container">
+      <h2>Why this exists</h2>
+      <p class="section-sub">Vibecoding made games easy to build. This makes them easy to monetize.</p>
       <div class="features">
         <div class="feature">
           <span class="feature-icon">&#9889;</span>
-          <h3>SDK References</h3>
-          <p>Complete Server, Browser, and Hybrid SDK docs with integration patterns for Express, Next.js, React, Phaser, and vanilla JS.</p>
-        </div>
-        <div class="feature">
-          <span class="feature-icon">&#128274;</span>
-          <h3>API &amp; Auth</h3>
-          <p>Full API endpoint reference and HMAC-SHA256 authentication guide. Copy-paste examples in TypeScript, Python, and cURL.</p>
+          <h3>Claude already knows how</h3>
+          <p>The skill loads SDK docs, code patterns, and API references directly into context. Claude writes the integration code for you.</p>
         </div>
         <div class="feature">
           <span class="feature-icon">&#129302;</span>
-          <h3>MCP Tools</h3>
-          <p>30+ Model Context Protocol tools. Register games, track points, launch Playcoins, and manage leaderboards from your AI assistant.</p>
+          <h3>30+ MCP tools built in</h3>
+          <p>Register games, track points, launch tokens, check leaderboards — Claude does it all through the Play.fun MCP server without leaving your editor.</p>
         </div>
         <div class="feature">
           <span class="feature-icon">&#128187;</span>
-          <h3>Code Snippets</h3>
-          <p>Production-ready code for common scenarios. Defensive patterns, anti-cheat, session handling, and batch operations.</p>
+          <h3>Works with any game</h3>
+          <p>Vanilla JS, React, Phaser, canvas — if it runs in a browser, it works. Production-ready snippets for every framework.</p>
+        </div>
+        <div class="feature">
+          <span class="feature-icon">&#128274;</span>
+          <h3>Anti-cheat included</h3>
+          <p>Server-side validation, score limits, session caps. Real token rewards need real security — the skill knows the right patterns.</p>
         </div>
         <div class="feature">
           <span class="feature-icon">&#128640;</span>
-          <h3>Deployment</h3>
-          <p>GitHub Pages deployment guide for free game hosting. One command to go from local game to live URL.</p>
+          <h3>Deploy for free</h3>
+          <p>Built-in GitHub Pages deployment. Go from local game to a live play.fun URL in one command.</p>
         </div>
         <div class="feature">
           <span class="feature-icon">&#127918;</span>
-          <h3>Best Practices</h3>
-          <p>Security, validation, rate limiting, and SDK selection guidance. Know when to use Server vs Browser vs Hybrid.</p>
+          <h3>Launch your own token</h3>
+          <p>Create a Playcoin for your game — a Solana token on a bonding curve. Players earn it, trade it, hold it. Your game has its own economy.</p>
         </div>
       </div>
     </div>
@@ -385,8 +460,8 @@
   <!-- SDK comparison -->
   <section>
     <div class="container">
-      <h2>Choose your SDK</h2>
-      <p class="section-sub">Three integration paths depending on your needs.</p>
+      <h2>Pick how deep you want to go</h2>
+      <p class="section-sub">Quick prototype? Drop in the Browser SDK. Serious game? The skill guides Claude to use the Server SDK with proper anti-cheat.</p>
       <table class="sdk-table">
         <thead>
           <tr>
@@ -397,19 +472,19 @@
         </thead>
         <tbody>
           <tr>
-            <td>Production game with token rewards</td>
+            <td>Your game is ready for real players &amp; real tokens</td>
             <td>Server SDK</td>
             <td><span class="badge badge-rec">Recommended</span></td>
           </tr>
           <tr>
-            <td>Anti-cheat &amp; Play.fun widget</td>
+            <td>You want security + the Play.fun leaderboard widget</td>
             <td>Hybrid (Server + Browser)</td>
             <td><span class="badge badge-rec">Recommended</span></td>
           </tr>
           <tr>
-            <td>Quick prototype or game jam</td>
+            <td>You just vibecoded something and want to try it out</td>
             <td>Browser SDK</td>
-            <td><span class="badge badge-proto">Prototype</span></td>
+            <td><span class="badge badge-proto">Fastest</span></td>
           </tr>
         </tbody>
       </table>
@@ -459,8 +534,8 @@
   <!-- What's inside -->
   <section>
     <div class="container">
-      <h2>What's inside</h2>
-      <p class="section-sub">Skill files loaded into Claude Code's context when you need them.</p>
+      <h2>What Claude gets when you install</h2>
+      <p class="section-sub">Everything it needs to monetize your game without you reading a single doc.</p>
       <div class="contents-grid">
         <div class="contents-item"><span class="icon">&#128214;</span> API Reference</div>
         <div class="contents-item"><span class="icon">&#128272;</span> Auth Guide</div>
