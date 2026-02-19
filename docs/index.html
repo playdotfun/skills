@@ -95,11 +95,41 @@
     }
     .install-box .copy-btn:hover { color: var(--text); }
 
+    .install-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .install-tab {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 14px;
+      font-size: 0.8rem;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .install-tab:hover { color: var(--text); border-color: #333; }
+    .install-tab.active { color: var(--text); border-color: var(--red); background: rgba(253, 7, 9, 0.08); }
+
     .install-hint {
       margin-top: 12px;
       font-size: 0.8rem;
       color: var(--muted);
     }
+
+    .agent-support {
+      margin-top: 20px;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .agent-support strong { color: var(--text); }
 
     /* Section */
     section { padding: 60px 0; }
@@ -369,6 +399,13 @@
       </svg>
       <h1>Monetize your <span>vibecoded</span> games</h1>
       <p class="subtitle">Vibe code a game with AI. Install one skill. Your players earn real token rewards. That's it.</p>
+      <div class="install-tabs">
+        <button class="install-tab active" data-cmd="npx skills add playdotfun/skills">All agents</button>
+        <button class="install-tab" data-cmd="npx skills add playdotfun/skills -a antigravity">Antigravity</button>
+        <button class="install-tab" data-cmd="npx skills add playdotfun/skills -a claude-code">Claude Code</button>
+        <button class="install-tab" data-cmd="npx skills add playdotfun/skills -a cursor">Cursor</button>
+        <button class="install-tab" data-cmd="npx skills add playdotfun/skills -a codex">Codex</button>
+      </div>
       <div class="install-box" onclick="copyInstall()">
         <span class="prompt">$</span>
         <span class="cmd" id="install-cmd">npx skills add playdotfun/skills</span>
@@ -377,6 +414,7 @@
         </button>
       </div>
       <p class="install-hint" id="install-hint">Click to copy</p>
+      <p class="agent-support">Works with <strong>40+ AI agents</strong> including Antigravity, Claude Code, Cursor, Codex, Copilot, Cline, Windsurf, and more</p>
     </div>
   </div>
 
@@ -555,6 +593,56 @@
 
   <hr class="divider">
 
+  <!-- Manual install -->
+  <section>
+    <div class="container">
+      <h2>Manual install</h2>
+      <p class="section-sub">Prefer to skip the CLI? Clone the repo directly into your agent's skills directory.</p>
+      <div class="code-block">
+        <div class="code-tabs">
+          <button class="code-tab active" data-panel="manual-antigravity">Antigravity</button>
+          <button class="code-tab" data-panel="manual-claude">Claude Code</button>
+          <button class="code-tab" data-panel="manual-cursor">Cursor</button>
+          <button class="code-tab" data-panel="manual-global">Global (any agent)</button>
+        </div>
+        <div class="code-panel active" id="panel-manual-antigravity">
+<pre><span class="cm"># Workspace scope (this project only)</span>
+<span class="vr">mkdir</span> -p <span class="str">.agent/skills</span>
+<span class="vr">git</span> clone https://github.com/playdotfun/skills <span class="str">.agent/skills/playdotfun</span>
+
+<span class="cm"># Global scope (all projects)</span>
+<span class="vr">mkdir</span> -p <span class="str">~/.gemini/antigravity/skills</span>
+<span class="vr">git</span> clone https://github.com/playdotfun/skills <span class="str">~/.gemini/antigravity/skills/playdotfun</span></pre>
+        </div>
+        <div class="code-panel" id="panel-manual-claude">
+<pre><span class="cm"># Project scope</span>
+<span class="vr">mkdir</span> -p <span class="str">.claude/skills</span>
+<span class="vr">git</span> clone https://github.com/playdotfun/skills <span class="str">.claude/skills/playdotfun</span>
+
+<span class="cm"># Global scope</span>
+<span class="vr">mkdir</span> -p <span class="str">~/.claude/skills</span>
+<span class="vr">git</span> clone https://github.com/playdotfun/skills <span class="str">~/.claude/skills/playdotfun</span></pre>
+        </div>
+        <div class="code-panel" id="panel-manual-cursor">
+<pre><span class="cm"># Project scope</span>
+<span class="vr">mkdir</span> -p <span class="str">.cursor/skills</span>
+<span class="vr">git</span> clone https://github.com/playdotfun/skills <span class="str">.cursor/skills/playdotfun</span>
+
+<span class="cm"># Global scope</span>
+<span class="vr">mkdir</span> -p <span class="str">~/.cursor/skills</span>
+<span class="vr">git</span> clone https://github.com/playdotfun/skills <span class="str">~/.cursor/skills/playdotfun</span></pre>
+        </div>
+        <div class="code-panel" id="panel-manual-global">
+<pre><span class="cm"># Works with any agent — drop into .agents/skills/</span>
+<span class="vr">mkdir</span> -p <span class="str">.agents/skills</span>
+<span class="vr">git</span> clone https://github.com/playdotfun/skills <span class="str">.agents/skills/playdotfun</span></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
   <!-- Footer -->
   <footer>
     <div class="container">
@@ -578,6 +666,16 @@
         setTimeout(() => { hint.textContent = 'Click to copy'; }, 2000);
       });
     }
+
+    // Install tabs
+    document.querySelectorAll('.install-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.install-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById('install-cmd').textContent = tab.dataset.cmd;
+        document.getElementById('install-hint').textContent = 'Click to copy';
+      });
+    });
 
     // Code tabs
     document.querySelectorAll('.code-tab').forEach(tab => {
