@@ -61,9 +61,9 @@ Converts jpeg/png/webp images to base64 encoded strings for use with Play.fun up
 # Output: data:image/webp;base64,UklGRlYAAABXRUJQ...
 ```
 
-### Claude Usage
+### Agent Usage
 
-Claude can use this script to convert images for Play.fun uploads:
+Your AI agent can use this script to convert images for Play.fun uploads:
 
 ```bash
 # Convert and capture the base64 output
@@ -77,7 +77,7 @@ The script outputs metadata to stderr and the actual content to stdout, making i
 
 ## playfun-auth.js
 
-Manages Play.fun API credentials for Claude Code integration. Supports web callback and manual credential entry.
+Manages Play.fun API credentials for AI coding agent integration. Supports web callback and manual credential entry.
 
 ### Usage
 
@@ -118,9 +118,9 @@ node skills/scripts/playfun-auth.js setup
 ### Credential Storage
 
 - **Credentials**: `~/.playfun/config.json` (permissions: 600)
-- **Claude config**: `~/.claude.json` (MCP server configuration)
+- **Agent MCP config**: e.g. `~/.claude.json` (MCP server configuration)
 
-### Claude Usage
+### Agent Usage
 
 ```bash
 # Check if credentials exist

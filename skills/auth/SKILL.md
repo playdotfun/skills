@@ -1,6 +1,6 @@
 # Play.fun Authentication Setup
 
-This guide helps users configure Play.fun API credentials for Claude Code integration.
+This guide helps users configure Play.fun API credentials for AI coding agent integration.
 
 ## When to Use
 
@@ -32,7 +32,7 @@ This method starts a local server that receives credentials via redirect from Pl
 2. The server will start on `http://localhost:9876`
 3. Prompt the user to open the browser to: `https://app.play.fun/skills-auth?callback=http://localhost:9876/callback`
 4. The user will be prompted to authenticate with Play.fun if not done already, and then the redirect will occur with the credentials (also displayed in the browser window to be pasted into the terminal if needed)
-5. The script automatically saves credentials to `~/.claude.json`
+5. The script automatically saves credentials to the agent config
 
 **Notes:**
 
@@ -90,7 +90,7 @@ This shows:
 - Partial API key (for identification)
 - When credentials were created
 - Source method (callback or manual)
-- Claude config status
+- Agent config status
 
 ## Clearing Credentials
 
@@ -102,13 +102,13 @@ node skills/scripts/playfun-auth.js clear
 
 This removes credentials from:
 
-- `~/.claude.json` MCP server config
+- MCP server config (e.g. `~/.claude.json` for Claude Code)
 
 ## Credential Storage
 
 **Locations:**
 
-- Claude config: `~/.claude.json`
+- Agent MCP config (e.g. `~/.claude.json` for Claude Code)
 
 **Config format:**
 
@@ -136,17 +136,17 @@ Another process is using the callback port. Either:
 - Format must be: `base64(apiKey:secretKey)` with a colon separator
 - Get fresh credentials from Play.fun dashboard
 
-### Claude config not updating
+### Agent config not updating
 
-- Check that `~/.claude.json` is writable
-- Restart Claude Code after credential setup
+- Check that the config file is writable (e.g. `~/.claude.json`)
+- Restart your AI coding agent after credential setup
 
 ### test_connection fails after setup
 
 - Credentials may be invalid or expired
 - Run `node skills/scripts/playfun-auth.js clear` and set up again with fresh credentials
 
-## Workflow for Claude
+## Workflow for AI Agents
 
 When performing authenticated Play.fun operations:
 

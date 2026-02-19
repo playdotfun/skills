@@ -1,4 +1,4 @@
-# Play.fun Skills for Claude Code
+# Play.fun Skills for AI Coding Agents
 
 Best practices, references, and templates for integrating games with the Play.fun ecosystem.
 

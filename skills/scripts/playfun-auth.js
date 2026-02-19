@@ -3,7 +3,7 @@
 /**
  * Play.fun Credential Management Script
  *
- * Manages API credentials for Play.fun integration with Claude Code.
+ * Manages API credentials for Play.fun integration with AI coding agents.
  * Supports two authentication methods:
  * 1. Web Callback - Local server receives credentials via redirect
  * 2. Manual Paste - User pastes base64-encoded credentials
@@ -23,7 +23,7 @@ const os = require('os');
 const readline = require('readline');
 
 // Configuration
-const CLAUDE_CONFIG_FILE = path.join(os.homedir(), '.claude.json');
+const AGENT_CONFIG_FILE = path.join(os.homedir(), '.claude.json');
 const CALLBACK_PORT = 9876;
 const CALLBACK_TIMEOUT = 5 * 60 * 1000; // 5 minutes
 const MCP_SERVER_NAME = 'play-fun';
@@ -59,14 +59,14 @@ function logWarning(message) {
 }
 
 /**
- * Read the Claude config file
+ * Read the agent config file
  */
-function readClaudeConfig() {
-  if (!fs.existsSync(CLAUDE_CONFIG_FILE)) {
+function readAgentConfig() {
+  if (!fs.existsSync(AGENT_CONFIG_FILE)) {
     return {};
   }
   try {
-    const content = fs.readFileSync(CLAUDE_CONFIG_FILE, 'utf8');
+    const content = fs.readFileSync(AGENT_CONFIG_FILE, 'utf8');
     return JSON.parse(content);
   } catch (error) {
     return {};
@@ -74,10 +74,10 @@ function readClaudeConfig() {
 }
 
 /**
- * Read credentials from Claude config
+ * Read credentials from agent config
  */
-function readCredentialsFromClaudeConfig() {
-  const config = readClaudeConfig();
+function readCredentialsFromAgentConfig() {
+  const config = readAgentConfig();
   const serverConfig = config.mcpServers?.[MCP_SERVER_NAME];
 
   if (!serverConfig?.headers?.['x-api-key'] || !serverConfig?.headers?.['x-secret-key']) {
@@ -91,10 +91,10 @@ function readCredentialsFromClaudeConfig() {
 }
 
 /**
- * Save credentials to Claude config
+ * Save credentials to agent config
  */
-function saveCredentialsToClaudeConfig(apiKey, secretKey) {
-  const config = readClaudeConfig();
+function saveCredentialsToAgentConfig(apiKey, secretKey) {
+  const config = readAgentConfig();
 
   // Ensure mcpServers object exists
   if (!config.mcpServers) {
@@ -111,19 +111,19 @@ function saveCredentialsToClaudeConfig(apiKey, secretKey) {
     },
   };
 
-  fs.writeFileSync(CLAUDE_CONFIG_FILE, JSON.stringify(config, null, 2));
+  fs.writeFileSync(AGENT_CONFIG_FILE, JSON.stringify(config, null, 2));
   return true;
 }
 
 /**
- * Remove Play.fun credentials from Claude config
+ * Remove Play.fun credentials from agent config
  */
-function clearCredentialsFromClaudeConfig() {
-  const config = readClaudeConfig();
+function clearCredentialsFromAgentConfig() {
+  const config = readAgentConfig();
 
   if (config.mcpServers && config.mcpServers[MCP_SERVER_NAME]) {
     delete config.mcpServers[MCP_SERVER_NAME];
-    fs.writeFileSync(CLAUDE_CONFIG_FILE, JSON.stringify(config, null, 2));
+    fs.writeFileSync(AGENT_CONFIG_FILE, JSON.stringify(config, null, 2));
     return true;
   }
   return false;
@@ -158,20 +158,20 @@ function decodeCredentials(base64String) {
  * Check status of stored credentials
  */
 function checkStatus() {
-  const creds = readCredentialsFromClaudeConfig();
+  const creds = readCredentialsFromAgentConfig();
 
   console.log('\n--- Play.fun Authentication Status ---\n');
 
   if (!creds) {
     logWarning('No credentials found');
-    logInfo(`Config location: ${CLAUDE_CONFIG_FILE}`);
+    logInfo(`Config location: ${AGENT_CONFIG_FILE}`);
     console.log('\nRun "node playfun-auth.js setup" to configure credentials.\n');
     return false;
   }
 
   logSuccess('Credentials configured');
   console.log(`  API Key: ${creds.apiKey.substring(0, 8)}...`);
-  console.log(`  Config: ${CLAUDE_CONFIG_FILE}`);
+  console.log(`  Config: ${AGENT_CONFIG_FILE}`);
 
   console.log('\nUse the test_connection MCP tool to verify credentials work.\n');
   return true;
@@ -206,8 +206,8 @@ function startCallbackServer() {
         try {
           const { apiKey, secretKey } = decodeCredentials(credentials);
 
-          // Save credentials to Claude config
-          saveCredentialsToClaudeConfig(apiKey, secretKey);
+          // Save credentials to agent config
+          saveCredentialsToAgentConfig(apiKey, secretKey);
 
           res.writeHead(200, { 'Content-Type': 'text/html' });
           res.end(`
@@ -217,7 +217,7 @@ function startCallbackServer() {
             <body style="font-family: system-ui; padding: 40px; text-align: center;">
               <h1 style="color: #27ae60;">Authentication Successful!</h1>
               <p>Your Play.fun credentials have been saved.</p>
-              <p>You can close this window and return to Claude Code.</p>
+              <p>You can close this window and return to your editor.</p>
             </body>
             </html>
           `);
@@ -304,13 +304,13 @@ function handleManual(base64String) {
   try {
     const { apiKey, secretKey } = decodeCredentials(base64String);
 
-    // Save credentials to Claude config
-    saveCredentialsToClaudeConfig(apiKey, secretKey);
+    // Save credentials to agent config
+    saveCredentialsToAgentConfig(apiKey, secretKey);
 
     console.log('\n--- Credentials Saved ---\n');
-    logSuccess('Credentials saved to Claude config');
+    logSuccess('Credentials saved to agent config');
     console.log(`\nAPI Key: ${apiKey.substring(0, 8)}...`);
-    console.log(`Config: ${CLAUDE_CONFIG_FILE}`);
+    console.log(`Config: ${AGENT_CONFIG_FILE}`);
     console.log('\nUse the test_connection MCP tool to verify credentials work.\n');
 
   } catch (error) {
@@ -325,12 +325,12 @@ function handleManual(base64String) {
 function handleClear() {
   console.log('\n--- Clearing Credentials ---\n');
 
-  const cleared = clearCredentialsFromClaudeConfig();
+  const cleared = clearCredentialsFromAgentConfig();
 
   if (cleared) {
-    logSuccess('Removed credentials from Claude config');
+    logSuccess('Removed credentials from agent config');
   } else {
-    logWarning('No credentials found in Claude config');
+    logWarning('No credentials found in agent config');
   }
 
   console.log('\nCredentials cleared.\n');
