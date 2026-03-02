@@ -23,7 +23,7 @@ Before any authenticated operation, verify credentials are set up.
 
 1. **Check auth status** — Run `node skills/scripts/playfun-auth.js status` to see if credentials exist
 2. **Set up credentials if missing** — Follow the [Auth Setup](auth/SKILL.md) guide. Start the callback server and instruct the user to authenticate via their browser
-3. **Verify credentials work** — Use the `test_connection` MCP tool to confirm access
+3. **Verify credentials work** — Use the `test_connection` MCP tool to confirm access. **Save the returned user ID** — this is the **API key** that goes in the `<meta name="x-ogp-key">` tag later
 
 Do NOT proceed to Phase 2 until credentials are verified.
 
@@ -35,9 +35,9 @@ Do NOT proceed to Phase 2 until credentials are verified.
 #### Phase 3: Register the Game on Play.fun
 
 6. **Choose a game name and description** — Ask the user or generate a fun, descriptive name
-7. **Prepare a game image** — Find an existing logo/screenshot or ask the user for one. Convert to base64: `./skills/scripts/image-to-base64.sh <image_path> --data-uri`
+7. **Prepare a game image** — Find an existing image or generate a placeholder. **⚠️ CRITICAL: You MUST follow the [Image Safety Rules](rules/game-upload.md#️-mandatory-base64-image-safety-rules) exactly or you will crash.** The short version: (1) get/create an image file on disk, (2) run `./skills/scripts/image-to-base64.sh <image> --data-uri --file /tmp/game_image_b64.txt`, (3) Read the text file with the Read tool, (4) pass the string to `register_game`. NEVER output base64 to stdout. NEVER read binary image files with the Read tool.
 8. **Deploy the game to get a public URL** — If the game needs hosting, use the [GitHub Pages Deploy](github-pages/deploy.md) guide. The game URL must be publicly accessible
-9. **Register the game** — Use the MCP `register_game` tool with: name, description, gameUrl, platform, base64Image, and anti-cheat limits (see [Best Practices](sdks/best-practices.md) for limit recommendations based on game type). Save the returned `gameId` — you will need it for SDK integration
+9. **Register the game** — Use the MCP `register_game` tool with: name, description, gameUrl, platform, base64Image, and anti-cheat limits (see [Best Practices](sdks/best-practices.md) for limit recommendations based on game type). Save the returned **`id`** (game UUID) — this is the **game ID** that goes in `sdk.init({ gameId })` later
 10. **Confirm registration** — Use the MCP `get_my_games` tool to verify the game appears in the user's game list
 
 Do NOT proceed to Phase 4 until you have a valid `gameId` from registration.
@@ -49,12 +49,12 @@ Do NOT proceed to Phase 4 until you have a valid `gameId` from registration.
     - **Server SDK** ([Reference](sdks/server.md)) — For production games with token rewards and anti-cheat
     - **Hybrid** ([Reference](sdks/hybrid.md)) — Both Browser widget + Server validation (recommended for production)
 12. **Add the SDK with real credentials** — Follow the chosen SDK reference. For Browser SDK integration:
-    - Add meta tag: `<meta name="x-ogp-key" content="CREATOR_ID" id="ogp-key-meta" />` (the creator/user UUID, NOT the gameKey or gameId)
-    - Add script: `<script src="https://sdk.play.fun/"></script>`
+    - Add meta tag: `<meta name="x-ogp-key" content="your-api-key" />` — value is the **creator API key** (user UUID from dashboard), NOT the gameId or gameKey
+    - Add script: `<script src="https://sdk.play.fun"></script>`
     - Use `OpenGameSDK` class (NOT PlayFunSDK)
     - Use defensive patterns: `typeof` guard, `sdkReady` flag, `sdk && sdkReady` checks, try/catch, score > 0 check (see [Browser SDK Snippets](snippets/browser-sdk.md))
-    - Init with real gameId: `sdk.init({ gameId: 'GAME_UUID' })` (the game's `id` from register_game response)
-13. **Wire up scoring** — Integrate `sdk.addPoints()` during gameplay and `sdk.savePoints()` at game end or periodically
+    - Init with **game ID**: `sdk.init({ gameId: 'your-game-id' })` — this is the `id` field from the `register_game` response, NOT the API key
+13. **Wire up scoring** — Integrate `sdk.addPoints()` during gameplay and `sdk.endGame()` at game end (for Browser SDK) or server-side `savePoints()` + `sdk.refreshPointsAndMultiplier()` (for Hybrid)
 14. **Test SDK integration** — Open the game, verify the Play.fun widget appears, play a round, and confirm points are submitted
 
 #### Phase 5: Deploy and Verify
@@ -73,6 +73,7 @@ Do NOT proceed to Phase 4 until you have a valid `gameId` from registration.
 | [Server SDK Reference](sdks/server.md) | Server-side SDK reference |
 | [Browser SDK Reference](sdks/browser.md) | Browser SDK reference |
 | [Hybrid SDK Reference](sdks/hybrid.md) | Browser + Server combined reference |
+| [Features (Streaks & Multipliers)](sdks/features.md) | Built-in engagement features |
 | [MCP Quickstart](mcp/quickstart.md) | MCP tools for game registration and management |
 | [Glossary](glossary.md) | Play.fun terms and concepts |
 | [Auth Setup](auth/SKILL.md) | Credential setup guide |

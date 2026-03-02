@@ -10,7 +10,9 @@ metadata:
 ## Installation (CDN)
 
 ```html
-<meta name="x-ogp-key" content="YOUR_CREATOR_ID" id="ogp-key-meta" />
+<!-- Step 1: API key meta tag (creator UUID from dashboard — NOT the gameId) -->
+<meta name="x-ogp-key" content="your-api-key" />
+<!-- Step 2: SDK script -->
 <script src="https://sdk.play.fun"></script>
 ```
 
@@ -30,7 +32,7 @@ let sdkReady = false;
 if (typeof OpenGameSDK !== 'undefined') {
   sdk = new OpenGameSDK({
     ui: { usePointsWidget: true },
-    logLevel: 1,
+    logLevel: 'info',
   });
 
   sdk.on('OnReady', () => {
@@ -50,8 +52,8 @@ if (typeof OpenGameSDK !== 'undefined') {
 ```javascript
 if (typeof OpenGameSDK !== 'undefined') {
   sdk = new OpenGameSDK({
-    ui: { usePointsWidget: true, theme: 'dark' },
-    logLevel: 1,
+    ui: { usePointsWidget: true, theme: 'dark' }, // 'dark', 'light', or 'system'
+    logLevel: 'info',
   });
 
   sdk.on('OnReady', () => { sdkReady = true; });
@@ -59,21 +61,39 @@ if (typeof OpenGameSDK !== 'undefined') {
 }
 ```
 
-## Add and Save Points
+## Add Points and End Game
 
 ```javascript
-// Add points during gameplay (updates widget display)
+// Add points during gameplay (updates widget display, accumulates locally)
 // Always check sdk && sdkReady before calling
 if (sdk && sdkReady) {
   sdk.addPoints(10);
 }
 
-// Save total score to server at game over (triggers auto-login if needed)
-if (sdk && sdkReady && totalScore > 0) {
+// End game — saves all accumulated points via blocking modal
+// IMPORTANT: Do NOT call during active gameplay!
+// Auto-triggers login if player isn't authenticated
+// Rate-limited to once per 5 seconds
+if (sdk && sdkReady) {
   try {
-    await sdk.savePoints(totalScore);
+    await sdk.endGame();
   } catch (e) {
     console.log('Save error:', e);
+  }
+}
+```
+
+## Best Practice: Track Improvements
+
+```javascript
+// To prevent duplicate rewards, only add the difference when players beat their best
+let previousBest = 0;
+
+function onScoreUpdate(newScore) {
+  if (newScore > previousBest) {
+    const improvement = newScore - previousBest;
+    if (sdk && sdkReady) sdk.addPoints(improvement);
+    previousBest = newScore;
   }
 }
 ```
@@ -96,7 +116,16 @@ sdk.on('SavePointsFailed', (error) => {
 
 sdk.on('LoginSuccess', () => {
   console.log('Player logged in:', sdk.playerId);
+  console.log('Session token:', sdk.sessionToken);
 });
+
+// Listen to ALL events
+sdk.onAll((eventName, data) => {
+  console.log(`Event: ${eventName}`, data);
+});
+
+// Unsubscribe
+sdk.off('OnReady', myCallback);
 ```
 
 ## Simple Clicker Game
@@ -106,7 +135,7 @@ sdk.on('LoginSuccess', () => {
 <html>
   <head>
     <title>Clicker Game</title>
-    <meta name="x-ogp-key" content="YOUR_CREATOR_ID" id="ogp-key-meta" />
+    <meta name="x-ogp-key" content="your-api-key" id="ogp-key-meta" />
     <script src="https://sdk.play.fun"></script>
     <style>
       body {
@@ -129,6 +158,7 @@ sdk.on('LoginSuccess', () => {
     <h1>Click the Button!</h1>
     <div id="score">0</div>
     <button id="click-btn">Click Me!</button>
+    <button id="end-btn">End Game</button>
 
     <script>
       let score = 0;
@@ -138,7 +168,7 @@ sdk.on('LoginSuccess', () => {
       if (typeof OpenGameSDK !== 'undefined') {
         sdk = new OpenGameSDK({
           ui: { usePointsWidget: true },
-          logLevel: 1,
+          logLevel: 'info',
         });
 
         sdk.on('OnReady', () => { sdkReady = true; });
@@ -154,15 +184,16 @@ sdk.on('LoginSuccess', () => {
         if (sdk && sdkReady) sdk.addPoints(1);
       };
 
-      // Auto-save every 30 seconds
-      setInterval(() => {
-        if (sdk && sdkReady && score > 0) sdk.savePoints(score);
-      }, 30000);
-
-      // Save on page close
-      window.addEventListener('beforeunload', () => {
-        if (sdk && sdkReady) sdk.savePoints(score);
-      });
+      // End game button saves all accumulated points
+      document.getElementById('end-btn').onclick = async () => {
+        if (sdk && sdkReady) {
+          try {
+            await sdk.endGame();
+          } catch (e) {
+            console.log('Save error:', e);
+          }
+        }
+      };
     </script>
   </body>
 </html>
@@ -175,7 +206,7 @@ sdk.on('LoginSuccess', () => {
 <html>
   <head>
     <title>Canvas Game</title>
-    <meta name="x-ogp-key" content="YOUR_CREATOR_ID" id="ogp-key-meta" />
+    <meta name="x-ogp-key" content="your-api-key" id="ogp-key-meta" />
     <script src="https://sdk.play.fun"></script>
   </head>
   <body>
@@ -192,7 +223,7 @@ sdk.on('LoginSuccess', () => {
       if (typeof OpenGameSDK !== 'undefined') {
         sdk = new OpenGameSDK({
           ui: { usePointsWidget: true },
-          logLevel: 1,
+          logLevel: 'info',
         });
 
         sdk.on('OnReady', () => {
@@ -222,9 +253,9 @@ sdk.on('LoginSuccess', () => {
 
       async function endGame() {
         gameOver = true;
-        if (sdk && sdkReady && score > 0) {
+        if (sdk && sdkReady) {
           try {
-            await sdk.savePoints(score);
+            await sdk.endGame();
           } catch (e) {
             console.log('Save error:', e);
           }
@@ -246,12 +277,8 @@ sdk.on('LoginSuccess', () => {
 
 ```tsx
 import { useEffect, useRef, useState } from 'react';
-
-declare global {
-  interface Window {
-    OpenGameSDK: any;
-  }
-}
+import OpenGameSDK from '@playdotfun/game-sdk';
+import type { SDKOpts } from '@playdotfun/game-sdk';
 
 export function usePlayFun(gameId: string) {
   const sdkRef = useRef<any>(null);
@@ -259,37 +286,19 @@ export function usePlayFun(gameId: string) {
   const [points, setPoints] = useState(0);
 
   useEffect(() => {
-    // Load SDK script
-    const meta = document.createElement('meta');
-    meta.name = 'x-ogp-key';
-    meta.content = 'YOUR_CREATOR_ID';
-    document.head.appendChild(meta);
+    const sdk = new OpenGameSDK({
+      ui: { usePointsWidget: true },
+    } as SDKOpts);
 
-    const script = document.createElement('script');
-    script.src = 'https://sdk.play.fun';
-    script.onload = () => {
-      if (typeof window.OpenGameSDK === 'undefined') return;
+    sdk.on('OnReady', () => {
+      sdkRef.current = sdk;
+      setReady(true);
+    });
 
-      const sdk = new window.OpenGameSDK({
-        ui: { usePointsWidget: true },
-        logLevel: 1,
-      });
-
-      sdk.on('OnReady', () => {
-        sdkRef.current = sdk;
-        setReady(true);
-      });
-
-      sdk.on('SavePointsSuccess', () => console.log('Score saved!'));
-      sdk.on('SavePointsFailed', () => console.log('Save failed'));
-
-      sdk.init({ gameId });
-    };
-    document.head.appendChild(script);
+    sdk.init({ gameId });
 
     return () => {
-      meta.remove();
-      script.remove();
+      // Cleanup if needed
     };
   }, [gameId]);
 
@@ -300,22 +309,22 @@ export function usePlayFun(gameId: string) {
     }
   };
 
-  const savePoints = async (score: number) => {
+  const endGame = async () => {
     if (sdkRef.current) {
       try {
-        await sdkRef.current.savePoints(score);
+        await sdkRef.current.endGame();
       } catch (e) {
         console.log('Save error:', e);
       }
     }
   };
 
-  return { ready, points, addPoints, savePoints };
+  return { ready, points, addPoints, endGame };
 }
 
 // Usage
 function Game() {
-  const { ready, points, addPoints, savePoints } = usePlayFun('your-game-uuid');
+  const { ready, points, addPoints, endGame } = usePlayFun('your-game-uuid');
 
   if (!ready) return <div>Loading...</div>;
 
@@ -323,7 +332,7 @@ function Game() {
     <div>
       <p>Points: {points}</p>
       <button onClick={() => addPoints(10)}>+10 Points</button>
-      <button onClick={() => savePoints(points)}>Save</button>
+      <button onClick={endGame}>End Game</button>
     </div>
   );
 }
@@ -347,7 +356,7 @@ class GameScene extends Phaser.Scene {
     if (typeof OpenGameSDK !== 'undefined') {
       this.sdk = new OpenGameSDK({
         ui: { usePointsWidget: true },
-        logLevel: 1,
+        logLevel: 'info',
       });
 
       this.sdk.on('OnReady', () => { this.sdkReady = true; });
@@ -372,10 +381,10 @@ class GameScene extends Phaser.Scene {
   }
 
   async gameOver() {
-    // Save points when game ends
-    if (this.sdk && this.sdkReady && this.score > 0) {
+    // End game saves all accumulated points
+    if (this.sdk && this.sdkReady) {
       try {
-        await this.sdk.savePoints(this.score);
+        await this.sdk.endGame();
       } catch (e) {
         console.log('Save error:', e);
       }
@@ -385,59 +394,24 @@ class GameScene extends Phaser.Scene {
 }
 ```
 
-## Auto-Save with Debounce
-
-```javascript
-let sdk = null;
-let sdkReady = false;
-let saveTimeout = null;
-let totalScore = 0;
-let unsavedPoints = 0;
-
-if (typeof OpenGameSDK !== 'undefined') {
-  sdk = new OpenGameSDK({
-    ui: { usePointsWidget: true },
-    logLevel: 1,
-  });
-
-  sdk.on('OnReady', () => { sdkReady = true; });
-  sdk.init({ gameId: 'your-game-uuid' });
-}
-
-function addPointsWithAutoSave(points) {
-  totalScore += points;
-  if (sdk && sdkReady) sdk.addPoints(points);
-  unsavedPoints += points;
-
-  if (saveTimeout) clearTimeout(saveTimeout);
-
-  // Save after 5 seconds of inactivity, or immediately if 100+ unsaved points
-  if (unsavedPoints >= 100) {
-    if (sdk && sdkReady) sdk.savePoints(totalScore);
-    unsavedPoints = 0;
-  } else {
-    saveTimeout = setTimeout(() => {
-      if (sdk && sdkReady) sdk.savePoints(totalScore);
-      unsavedPoints = 0;
-    }, 5000);
-  }
-}
-```
-
 ## Hybrid: Browser Widget + Server Validation
 
 ```javascript
 // Browser code - widget display only, scores go to YOUR server
+// Do NOT call endGame() in hybrid setups!
 let sdk = null;
 let sdkReady = false;
 
 if (typeof OpenGameSDK !== 'undefined') {
   sdk = new OpenGameSDK({
     ui: { usePointsWidget: true },
-    logLevel: 1,
+    logLevel: 'info',
   });
 
   sdk.on('OnReady', () => { sdkReady = true; });
+  sdk.on('LoginSuccess', () => {
+    console.log('Logged in, token:', sdk.sessionToken);
+  });
   sdk.init({ gameId: 'your-game-uuid' });
 }
 
@@ -449,14 +423,14 @@ async function startGame() {
   const res = await fetch('/api/start-session', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ playerId: getPlayerId() }),
+    body: JSON.stringify({ sessionToken: sdk.sessionToken }),
   });
   const data = await res.json();
   sessionId = data.sessionId;
   score = 0;
 }
 
-// Add score locally (display only)
+// Add score locally (updates widget display)
 function addScore(points) {
   score += points;
   if (sdk && sdkReady) sdk.addPoints(points);
@@ -469,52 +443,40 @@ async function endGame() {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      playerId: getPlayerId(),
+      sessionToken: sdk.sessionToken,
       score: score,
       sessionId: sessionId,
     }),
   });
-}
 
-function getPlayerId() {
-  let id = localStorage.getItem('playerId');
-  if (!id) {
-    id = crypto.randomUUID();
-    localStorage.setItem('playerId', id);
-  }
-  return id;
+  // CRITICAL: Sync the widget after server saves points
+  if (sdk && sdkReady) await sdk.refreshPointsAndMultiplier();
 }
 ```
 
 ## Player ID Management
 
 ```javascript
-// Get or create persistent player ID
+// After login, use sdk.playerId (Privy ID) as the canonical identifier
 function getPlayerId() {
-  let playerId = localStorage.getItem('playfun_player_id');
+  if (sdk && sdk.playerId) {
+    return sdk.playerId;
+  }
 
+  // Fallback: generate and persist a UUID
+  let playerId = localStorage.getItem('playfun_player_id');
   if (!playerId) {
     playerId = crypto.randomUUID();
     localStorage.setItem('playfun_player_id', playerId);
   }
-
   return playerId;
 }
 
-// Or use wallet address if available
-async function getPlayerIdFromWallet() {
-  if (window.solana && window.solana.isPhantom) {
-    const response = await window.solana.connect();
-    return response.publicKey.toString();
-  }
-  return getPlayerId(); // Fallback to UUID
-}
-
-// Or use sdk.playerId after login (Privy ID)
-function getPlayerIdFromSDK() {
-  if (sdk.playerId) {
-    return sdk.playerId;
-  }
-  return getPlayerId(); // Fallback to UUID
+// For hybrid integrations, use sessionToken instead of playerId
+function getSessionToken() {
+  return sdk ? sdk.sessionToken : undefined;
+  // Format: 'player_xxx...'
+  // Expires after 30 minutes
+  // Scoped to current game
 }
 ```

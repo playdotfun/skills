@@ -29,6 +29,7 @@ Converts jpeg/png/webp images to base64 encoded strings for use with Play.fun up
 | `--data-uri` | Include data URI prefix (`data:image/type;base64,...`) |
 | `--json` | Output as JSON with filename, mimeType, originalSize, encodedSize, and base64 |
 | `--copy` | Copy result to clipboard (requires xclip, xsel, or pbcopy) |
+| `--file FILE` | Write result to file instead of stdout (**recommended for AI agents**) |
 | `--help` | Show help message |
 
 ### Supported Formats
@@ -63,17 +64,17 @@ Converts jpeg/png/webp images to base64 encoded strings for use with Play.fun up
 
 ### Agent Usage
 
-Your AI agent can use this script to convert images for Play.fun uploads:
+**CRITICAL: AI agents must NEVER output base64 data to stdout/terminal.** Raw base64 in terminal output will be interpreted as image data by the agent runtime, causing errors. Always use `--file`:
 
 ```bash
-# Convert and capture the base64 output
-BASE64=$(./skills/scripts/image-to-base64.sh /path/to/image.png)
+# CORRECT: Write to file, then read with the Read tool
+./skills/scripts/image-to-base64.sh /path/to/image.png --data-uri --file /tmp/game_image_b64.txt
 
-# Or get structured JSON
-./skills/scripts/image-to-base64.sh /path/to/image.png --json
+# WRONG: Do NOT output to terminal
+./skills/scripts/image-to-base64.sh /path/to/image.png --data-uri   # BAD!
 ```
 
-The script outputs metadata to stderr and the actual content to stdout, making it easy to pipe or capture the result.
+The script outputs metadata to stderr (safe) and content to stdout or the specified file.
 
 ## playfun-auth.js
 

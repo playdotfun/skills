@@ -11,6 +11,7 @@ metadata:
 
 ```bash
 npm install @playdotfun/server-sdk
+# or: pnpm i / yarn add / bun add @playdotfun/server-sdk
 ```
 
 ## Initialize Client
@@ -31,7 +32,9 @@ const game = await client.games.register({
   name: 'My Awesome Game',
   description: 'A fun play-to-earn game',
   gameUrl: 'https://mygame.com',
-  platform: 'web',
+  platform: 'HTML',   // 'HTML' or 'EXTERNAL_URL'
+  isHTMLGame: true,
+  iframable: true,
   // Anti-cheat limits (recommended)
   maxScorePerSession: 1000,
   maxSessionsPerDay: 10,
@@ -51,7 +54,7 @@ await client.play.savePoints({
 });
 ```
 
-## Save Points (Batch)
+## Save Points (Batch - Object Format)
 
 ```typescript
 await client.play.batchSavePoints({
@@ -62,6 +65,53 @@ await client.play.batchSavePoints({
     'player-3': 75,
   },
 });
+```
+
+## Save Points (Batch - Array Format)
+
+```typescript
+await client.play.batchSavePoints({
+  gameId: 'your-game-uuid',
+  pointsRecord: [
+    { playerId: 'player-1', points: 100 },
+    { playerId: 'player-2', points: 250 },
+  ],
+});
+// Max 1,000 entries per batch. Rate limit: 3 req/sec.
+```
+
+## Player ID Formats
+
+```typescript
+// All these formats are valid as playerId:
+await client.play.savePoints({ gameId, playerId: 'sol:9qdvVLY3v...', points: 100 }); // Solana wallet
+await client.play.savePoints({ gameId, playerId: 'eth:0x123...', points: 100 });      // Ethereum wallet
+await client.play.savePoints({ gameId, playerId: 'email:user@example.com', points: 100 }); // Email
+await client.play.savePoints({ gameId, playerId: 'twitter:handle', points: 100 });    // Twitter/X
+await client.play.savePoints({ gameId, playerId: 'did:privy:abc123', points: 100 });  // Privy ID
+await client.play.savePoints({ gameId, playerId: '550e8400-e29b-41d4-...', points: 100 }); // UUID (fastest)
+
+// Response includes mapping for caching:
+// { savedCount: 1, playerIdToOgpId: { 'twitter:handle': 'uuid-...' } }
+// Cache the OGP UUID and use it directly for faster lookups
+```
+
+## Validate Session Token
+
+```typescript
+// Validate a session token from the Browser SDK (for hybrid integrations)
+const { valid, playerId, ogpId, gameId } =
+  await client.play.validateSessionToken('player_xxx...');
+
+if (valid && ogpId) {
+  // Use ogpId as playerId in savePoints for best performance
+  await client.play.savePoints({
+    gameId: 'your-game-uuid',
+    playerId: ogpId,
+    points: 100,
+  });
+}
+// Token expires after 30 minutes, scoped to game
 ```
 
 ## Get Player Points
@@ -103,10 +153,16 @@ const client = new OpenGameClient({
 
 const GAME_ID = process.env.GAME_ID!;
 
-// Submit score endpoint
+// Submit score endpoint with session token validation
 app.post('/api/submit-score', async (req, res) => {
   try {
-    const { playerId, score } = req.body;
+    const { sessionToken, score } = req.body;
+
+    // Validate the Play.fun session token
+    const { valid, ogpId } = await client.play.validateSessionToken(sessionToken);
+    if (!valid || !ogpId) {
+      return res.status(401).json({ error: 'Invalid session' });
+    }
 
     // Validate score (add your own logic)
     if (score < 0 || score > 10000) {
@@ -115,7 +171,7 @@ app.post('/api/submit-score', async (req, res) => {
 
     await client.play.savePoints({
       gameId: GAME_ID,
-      playerId,
+      playerId: ogpId,
       points: score,
     });
 
@@ -154,11 +210,17 @@ const client = new OpenGameClient({
 
 export async function POST(request: NextRequest) {
   try {
-    const { playerId, score } = await request.json();
+    const { sessionToken, score } = await request.json();
+
+    // Validate session token
+    const { valid, ogpId } = await client.play.validateSessionToken(sessionToken);
+    if (!valid || !ogpId) {
+      return NextResponse.json({ error: 'Invalid session' }, { status: 401 });
+    }
 
     await client.play.savePoints({
       gameId: process.env.GAME_ID!,
-      playerId,
+      playerId: ogpId,
       points: score,
     });
 
@@ -181,16 +243,19 @@ const client = new OpenGameClient({
 
 // In-memory session store (use Redis in production)
 const sessions = new Map<string, {
-  playerId: string;
+  ogpId: string;
   startTime: number;
   events: Array<{ type: string; timestamp: number }>;
 }>();
 
 // Start a game session
-function startSession(playerId: string): string {
+async function startSession(sessionToken: string): Promise<string> {
+  const { valid, ogpId } = await client.play.validateSessionToken(sessionToken);
+  if (!valid || !ogpId) throw new Error('Invalid session token');
+
   const sessionId = crypto.randomUUID();
   sessions.set(sessionId, {
-    playerId,
+    ogpId,
     startTime: Date.now(),
     events: [],
   });
@@ -209,14 +274,15 @@ function recordEvent(sessionId: string, eventType: string): boolean {
 // Validate and submit score
 async function submitScore(
   sessionId: string,
-  playerId: string,
+  sessionToken: string,
   score: number
 ): Promise<boolean> {
   const session = sessions.get(sessionId);
-
-  // Validation checks
   if (!session) throw new Error('Invalid session');
-  if (session.playerId !== playerId) throw new Error('Player mismatch');
+
+  // Re-validate the session token
+  const { valid, ogpId } = await client.play.validateSessionToken(sessionToken);
+  if (!valid || ogpId !== session.ogpId) throw new Error('Session mismatch');
 
   // Check if score is reasonable based on session duration
   const duration = Date.now() - session.startTime;
@@ -229,7 +295,7 @@ async function submitScore(
   // Submit to Play.fun
   await client.play.savePoints({
     gameId: process.env.GAME_ID!,
-    playerId,
+    playerId: ogpId,
     points: score,
   });
 
@@ -281,7 +347,7 @@ async function savePointsWithRetry(
 ## List Your Games
 
 ```typescript
-const { items: myGames } = await client.games.getMyGames();
+const { items: myGames } = await client.games.getAuthedGames();
 
 myGames.forEach((game) => {
   console.log(`${game.name} (${game.id})`);

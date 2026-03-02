@@ -7,6 +7,7 @@
 #   ./image-to-base64.sh <image_file> --data-uri    # Include data URI prefix
 #   ./image-to-base64.sh <image_file> --json        # Output as JSON object
 #   ./image-to-base64.sh <image_file> --copy        # Copy to clipboard (requires xclip/pbcopy)
+#   ./image-to-base64.sh <image_file> --file out.txt # Write to file (RECOMMENDED for AI agents)
 #
 # Examples:
 #   ./image-to-base64.sh game-thumbnail.png
@@ -30,6 +31,7 @@ usage() {
     echo "  --data-uri    Include data URI prefix (data:image/type;base64,...)"
     echo "  --json        Output as JSON object with filename, mimeType, and base64"
     echo "  --copy        Copy result to clipboard"
+    echo "  --file FILE   Write result to file instead of stdout (recommended for AI agents)"
     echo "  --help        Show this help message"
     echo ""
     echo "Supported formats: .jpg, .jpeg, .png, .webp"
@@ -53,6 +55,7 @@ shift
 DATA_URI=false
 JSON_OUTPUT=false
 COPY_CLIPBOARD=false
+OUTPUT_FILE=""
 
 while [ $# -gt 0 ]; do
     case "$1" in
@@ -64,6 +67,10 @@ while [ $# -gt 0 ]; do
             ;;
         --copy)
             COPY_CLIPBOARD=true
+            ;;
+        --file)
+            shift
+            OUTPUT_FILE="$1"
             ;;
         *)
             error "Unknown option: $1"
@@ -154,4 +161,9 @@ echo -e "  Original size: ${FILE_SIZE_KB}KB ($FILE_SIZE bytes)" >&2
 echo -e "  Encoded size: ${ENCODED_SIZE_KB}KB ($ENCODED_SIZE chars)" >&2
 
 # Output the result
-echo "$OUTPUT"
+if [ -n "$OUTPUT_FILE" ]; then
+    echo -n "$OUTPUT" > "$OUTPUT_FILE"
+    echo -e "  Written to: $OUTPUT_FILE" >&2
+else
+    echo "$OUTPUT"
+fi
