@@ -142,18 +142,23 @@ app.post('/api/submit-score', scoreLimiter, async (req, res) => {
 
 ## Player Identification
 
-### Wallet-Based (Recommended for Web3)
+The Server SDK accepts flexible player ID formats:
+
+| Format | Example | Notes |
+|--------|---------|-------|
+| Solana wallet | `sol:9qdvVLY3v...` | Looks up/creates user by Solana address |
+| Ethereum wallet | `eth:0x123...` | Looks up/creates user by ETH address |
+| Email | `email:player@example.com` | Looks up/creates user by email |
+| Twitter/X | `twitter:username` | Looks up/creates user by handle |
+| Privy ID | `did:privy:abc123` | Direct Privy user ID |
+| OGP User ID | `550e8400-e29b-...` | Raw UUID format (fastest) |
+
+### Session Token (Recommended for Hybrid)
 
 ```typescript
-// Player ID is their wallet address
-const playerId = walletAddress;
-```
-
-### Account-Based
-
-```typescript
-// Player ID is your internal user ID
-const playerId = user.id;
+// Use validateSessionToken for hybrid integrations
+const { valid, ogpId } = await client.play.validateSessionToken(sessionToken);
+// Use ogpId as playerId for best performance
 ```
 
 ### Anonymous (Browser SDK only)

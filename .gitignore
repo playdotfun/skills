@@ -1,0 +1,28 @@
+# AI agent config directories (symlink farms from skill installers)
+.agent/
+.agents/
+.cline/
+.commandcode/
+.continue/
+.crush/
+.cursor/
+.factory/
+.goose/
+.kilocode/
+.kiro/
+.mcpjam/
+.neovate/
+.openhands/
+.pi/
+.qoder/
+.qwen/
+.roo/
+.trae/
+.windsurf/
+.zencoder/
+
+# Claude Code local config
+.claude/
+
+# Examples (local only)
+examples/

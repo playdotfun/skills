@@ -24,7 +24,8 @@ The Hybrid approach combines the **Server SDK** for secure point submission with
 │  ┌─────────────────────────────────────────────┐   │
 │  │  Your Game                                   │   │
 │  │  - Game logic runs here                      │   │
-│  │  - Sends score to YOUR server for validation │   │
+│  │  - Gets sessionToken from SDK after login    │   │
+│  │  - Sends score + token to YOUR server        │   │
 │  └─────────────────────────────────────────────┘   │
 │                        │                            │
 │  ┌─────────────────────▼───────────────────────┐   │
@@ -32,19 +33,22 @@ The Hybrid approach combines the **Server SDK** for secure point submission with
 │  │  - Shows Play.fun widget                     │   │
 │  │  - Displays points, leaderboard              │   │
 │  │  - Handles wallet connect for claims         │   │
+│  │  - Do NOT call endGame() here!               │   │
 │  └─────────────────────────────────────────────┘   │
 └────────────────────────┼────────────────────────────┘
                          │
 ┌────────────────────────▼────────────────────────────┐
 │                   YOUR SERVER                        │
 │  ┌─────────────────────────────────────────────┐    │
-│  │  1. Receive score from browser               │    │
-│  │  2. VALIDATE the score (anti-cheat)          │    │
-│  │  3. Submit via Server SDK                    │    │
+│  │  1. Receive score + sessionToken from browser│    │
+│  │  2. Validate token via server SDK            │    │
+│  │  3. Validate the score (anti-cheat)          │    │
+│  │  4. Submit via Server SDK using ogpId        │    │
 │  └─────────────────────────────────────────────┘    │
 │                        │                             │
 │  ┌─────────────────────▼───────────────────────┐    │
 │  │  Server SDK                                  │    │
+│  │  client.play.validateSessionToken(token)     │    │
 │  │  client.play.savePoints(...)                 │    │
 │  └─────────────────────────────────────────────┘    │
 └────────────────────────┼────────────────────────────┘
@@ -53,19 +57,28 @@ The Hybrid approach combines the **Server SDK** for secure point submission with
                   Play.fun API
 ```
 
+## Flow
+
+1. **Client SDK initializes** — player logs in, SDK provides `sessionToken` and `playerId`
+2. **Client sends game state to your server** — includes `sessionToken` and score
+3. **Server validates session token** — calls `validateSessionToken()` to verify the player
+4. **Server validates game logic** — your own anti-cheat checks
+5. **Server saves points** — calls `savePoints()` using the `ogpId` from validation
+6. **Client syncs widget** — calls `refreshPointsAndMultiplier()` to update the display
+
 ## Server Setup (Node.js/Express)
 
 Install the Server SDK:
 
 ```bash
-npm install @playfun/server-sdk
+npm install @playdotfun/server-sdk
 ```
 
 Create your score submission endpoint:
 
 ```typescript
 import express from 'express';
-import { OpenGameClient } from '@playfun/server-sdk';
+import { OpenGameClient } from '@playdotfun/server-sdk';
 
 const app = express();
 app.use(express.json());
@@ -78,24 +91,25 @@ const client = new OpenGameClient({
 const GAME_ID = process.env.GAME_ID!;
 
 app.post('/api/submit-score', async (req, res) => {
-  const { playerId, score, gameSessionId } = req.body;
+  const { sessionToken, score, gameSessionId } = req.body;
 
-  // YOUR VALIDATION LOGIC HERE
-  // Example validations:
-  // - Check if session exists and is valid
-  // - Verify score is within expected range
-  // - Check for replay attacks
-  // - Apply rate limiting
-  const isValid = await validateScore(playerId, score, gameSessionId);
+  // Step 1: Validate the Play.fun session token
+  const { valid, ogpId } = await client.play.validateSessionToken(sessionToken);
+  if (!valid || !ogpId) {
+    return res.status(401).json({ error: 'Invalid session token' });
+  }
 
+  // Step 2: YOUR VALIDATION LOGIC HERE
+  const isValid = await validateScore(ogpId, score, gameSessionId);
   if (!isValid) {
     return res.status(400).json({ error: 'Invalid score' });
   }
 
+  // Step 3: Save to Play.fun using ogpId (fastest resolution)
   try {
     await client.play.savePoints({
       gameId: GAME_ID,
-      playerId,
+      playerId: ogpId,
       points: score,
     });
 
@@ -109,8 +123,9 @@ app.post('/api/submit-score', async (req, res) => {
 async function validateScore(playerId: string, score: number, sessionId: string): Promise<boolean> {
   // Implement your validation logic:
   // - Check session validity
-  // - Verify score is reasonable
+  // - Verify score is reasonable for session duration
   // - Check for duplicate submissions
+  // - Apply rate limiting
   return true;
 }
 
@@ -119,14 +134,15 @@ app.listen(3000);
 
 ## Browser Setup
 
-Add the Browser SDK for the widget:
+Add the Browser SDK for the widget — **do NOT call `endGame()` in hybrid setups**:
 
 ```html
 <!DOCTYPE html>
 <html>
   <head>
     <title>My Game</title>
-    <script src="https://sdk.play.fun/latest"></script>
+    <meta name="x-ogp-key" content="your-api-key" id="ogp-key-meta" />
+    <script src="https://sdk.play.fun"></script>
   </head>
   <body>
     <div id="game-container"></div>
@@ -134,14 +150,18 @@ Add the Browser SDK for the widget:
     <script>
       // SDK for widget display only - NOT for point submission
       const sdk = new OpenGameSDK({
-        gameId: 'your-game-uuid',
         ui: { usePointsWidget: true },
+        logLevel: 'info',
       });
 
-      await sdk.init();
+      sdk.on('OnReady', () => console.log('SDK ready'));
+      sdk.on('LoginSuccess', () => {
+        console.log('Player logged in');
+        console.log('Session token:', sdk.sessionToken);
+        console.log('Player ID:', sdk.playerId);
+      });
 
-      // Your game logic here...
-      let currentSessionId = generateSessionId();
+      sdk.init({ gameId: 'your-game-uuid' });
 
       // Submit scores to YOUR server (not directly to Play.fun)
       async function submitScore(score) {
@@ -149,7 +169,7 @@ Add the Browser SDK for the widget:
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            playerId: getCurrentPlayerId(),
+            sessionToken: sdk.sessionToken,  // 30-min scoped token
             score: score,
             gameSessionId: currentSessionId,
           }),
@@ -159,23 +179,10 @@ Add the Browser SDK for the widget:
           throw new Error('Failed to submit score');
         }
 
+        // CRITICAL: Sync the widget after server saves points
+        await sdk.refreshPointsAndMultiplier();
+
         return response.json();
-      }
-
-      function getCurrentPlayerId() {
-        // Return the player's unique identifier
-        // This could come from wallet address, game account, etc.
-        return localStorage.getItem('playerId') || generatePlayerId();
-      }
-
-      function generateSessionId() {
-        return crypto.randomUUID();
-      }
-
-      function generatePlayerId() {
-        const id = crypto.randomUUID();
-        localStorage.setItem('playerId', id);
-        return id;
       }
     </script>
   </body>
@@ -188,7 +195,7 @@ Add the Browser SDK for the widget:
 
 ```typescript
 import express from 'express';
-import { OpenGameClient } from '@opusgamelabs/server-sdk';
+import { OpenGameClient } from '@playdotfun/server-sdk';
 
 const app = express();
 app.use(express.json());
@@ -202,15 +209,21 @@ const client = new OpenGameClient({
 const GAME_ID = process.env.GAME_ID!;
 
 // In-memory session store (use Redis in production)
-const sessions = new Map<string, { playerId: string; startTime: number; maxScore: number }>();
+const sessions = new Map<string, { ogpId: string; startTime: number; maxScore: number }>();
 
 // Start a game session
-app.post('/api/start-session', (req, res) => {
-  const { playerId } = req.body;
-  const sessionId = crypto.randomUUID();
+app.post('/api/start-session', async (req, res) => {
+  const { sessionToken } = req.body;
 
+  // Validate the Play.fun session token
+  const { valid, ogpId } = await client.play.validateSessionToken(sessionToken);
+  if (!valid || !ogpId) {
+    return res.status(401).json({ error: 'Invalid session' });
+  }
+
+  const sessionId = crypto.randomUUID();
   sessions.set(sessionId, {
-    playerId,
+    ogpId,
     startTime: Date.now(),
     maxScore: 0,
   });
@@ -220,16 +233,22 @@ app.post('/api/start-session', (req, res) => {
 
 // Submit score with validation
 app.post('/api/submit-score', async (req, res) => {
-  const { playerId, score, gameSessionId } = req.body;
+  const { sessionToken, score, gameSessionId } = req.body;
+
+  // Re-validate the Play.fun session token
+  const { valid, ogpId } = await client.play.validateSessionToken(sessionToken);
+  if (!valid || !ogpId) {
+    return res.status(401).json({ error: 'Invalid session token' });
+  }
 
   const session = sessions.get(gameSessionId);
 
   // Validation checks
   if (!session) {
-    return res.status(400).json({ error: 'Invalid session' });
+    return res.status(400).json({ error: 'Invalid game session' });
   }
 
-  if (session.playerId !== playerId) {
+  if (session.ogpId !== ogpId) {
     return res.status(400).json({ error: 'Player mismatch' });
   }
 
@@ -243,7 +262,7 @@ app.post('/api/submit-score', async (req, res) => {
   // Save to Play.fun
   await client.play.savePoints({
     gameId: GAME_ID,
-    playerId,
+    playerId: ogpId,
     points: score,
   });
 
@@ -263,37 +282,41 @@ app.listen(3000);
 <html>
   <head>
     <title>My Hybrid Game</title>
-    <script src="https://cdn.play.fun/sdk/latest/game-sdk.min.js"></script>
+    <meta name="x-ogp-key" content="your-api-key" id="ogp-key-meta" />
+    <script src="https://sdk.play.fun"></script>
   </head>
   <body>
     <h1>Click Game</h1>
-    <button id="start-btn">Start Game</button>
+    <button id="login-btn">Login to Play</button>
+    <button id="start-btn" disabled>Start Game</button>
     <button id="click-btn" disabled>Click Me!</button>
     <button id="end-btn" disabled>End Game</button>
     <p>Score: <span id="score">0</span></p>
 
     <script>
       const sdk = new OpenGameSDK({
-        gameId: 'your-game-uuid',
         ui: { usePointsWidget: true },
+        logLevel: 'info',
       });
-
-      let playerId = localStorage.getItem('playerId');
-      if (!playerId) {
-        playerId = crypto.randomUUID();
-        localStorage.setItem('playerId', playerId);
-      }
 
       let sessionId = null;
       let score = 0;
 
-      sdk.init();
+      sdk.on('LoginSuccess', () => {
+        document.getElementById('login-btn').disabled = true;
+        document.getElementById('start-btn').disabled = false;
+        console.log('Logged in, token:', sdk.sessionToken);
+      });
+
+      sdk.init({ gameId: 'your-game-uuid' });
+
+      document.getElementById('login-btn').onclick = () => sdk.login();
 
       document.getElementById('start-btn').onclick = async () => {
         const res = await fetch('/api/start-session', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ playerId }),
+          body: JSON.stringify({ sessionToken: sdk.sessionToken }),
         });
         const data = await res.json();
         sessionId = data.sessionId;
@@ -307,14 +330,23 @@ app.listen(3000);
       document.getElementById('click-btn').onclick = () => {
         score += 10;
         document.getElementById('score').textContent = score;
+        // Update widget display (not saving to server yet)
+        sdk.addPoints(10);
       };
 
       document.getElementById('end-btn').onclick = async () => {
         await fetch('/api/submit-score', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ playerId, score, gameSessionId: sessionId }),
+          body: JSON.stringify({
+            sessionToken: sdk.sessionToken,
+            score: score,
+            gameSessionId: sessionId,
+          }),
         });
+
+        // Sync the widget with server-saved points
+        await sdk.refreshPointsAndMultiplier();
 
         document.getElementById('click-btn').disabled = true;
         document.getElementById('end-btn').disabled = true;
@@ -326,9 +358,21 @@ app.listen(3000);
 </html>
 ```
 
+## Session Token Details
+
+- **Format:** `player_xxx...`
+- **Expiry:** 30 minutes
+- **Scope:** Game-specific — cannot be used across different games
+- **Security:** Does not expose underlying authentication credentials
+- **Access:** `sdk.sessionToken` after login
+- **Validation:** Use `client.play.validateSessionToken(token)` on the server
+
 ## Important Notes
 
+- **Do NOT call `endGame()` in hybrid setups** — use server SDK for point submission
+- **Always call `refreshPointsAndMultiplier()`** after the server saves points to sync the widget
+- **Session tokens expire after 30 minutes** — handle expiration gracefully
+- **Use `ogpId`** from `validateSessionToken()` as the `playerId` in `savePoints()` for optimal performance
 - **Server validates, browser displays**: Never trust client-side scores
 - **Session management**: Track game sessions to prevent replay attacks
-- **Widget is display-only**: The browser SDK shows the widget but doesn't submit points
 - **Rate limiting**: Implement server-side rate limiting to prevent abuse

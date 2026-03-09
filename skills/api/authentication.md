@@ -18,15 +18,21 @@ Play.fun uses HMAC-SHA256 authentication for secure, stateless API requests. Thi
 
 ## Endpoints Requiring Authentication
 
-| Endpoint                        | Method | Description                   |
-| ------------------------------- | ------ | ----------------------------- |
-| `/games/me`                     | GET    | Get your registered games     |
-| `/games`                        | POST   | Register a new game           |
-| `/games/update/:gameId`         | POST   | Update a game (must be owner) |
-| `/games/update/token-splits`    | POST   | Update reward distribution    |
-| `/play/dev/points`              | GET    | Get player points             |
-| `/play/dev/leaderboard/:gameId` | GET    | Get game leaderboard          |
-| `/play/dev/batch-save-points`   | POST   | Save player points            |
+| Endpoint                             | Method | Description                          |
+| ------------------------------------ | ------ | ------------------------------------ |
+| `/games/me`                          | GET    | Get your registered games            |
+| `/games`                             | POST   | Register a new game                  |
+| `/games/update/:gameId`              | POST   | Update a game (must be owner)        |
+| `/games/update/token-splits`         | POST   | Update reward distribution           |
+| `/games/toggle-visibility/:id`       | POST   | Show/hide game from listings         |
+| `/games/claim-ownership/:gameId`     | POST   | Verify domain ownership              |
+| `/play/dev/points`                   | GET    | Get player points                    |
+| `/play/dev/leaderboard/:gameId`      | GET    | Get game leaderboard                 |
+| `/play/dev/batch-save-points`        | POST   | Save player points                   |
+| `/play/dev/validate-session-token`   | POST   | Validate a player session token      |
+| `/play/dev/sessions/:gameId`         | GET    | Get session data with anti-cheat     |
+| `/play/dev/risky-sessions/:gameId`   | GET    | Get risky sessions (riskScore > 0.5) |
+| `/play/dev/invalidate-sessions`      | POST   | Remove fraudulent sessions           |
 
 ## HMAC Signature Generation
 
@@ -36,7 +42,7 @@ Signatures are generated from these components:
 
 - HTTP method (lowercase)
 - Endpoint path (lowercase)
-- Unix timestamp (seconds)
+- Unix timestamp in milliseconds (must be within 5 minutes of server time)
 
 ```typescript
 import crypto from 'crypto';
@@ -56,16 +62,16 @@ function generateSignature(
 ### Authorization Header
 
 ```
-Authorization: HMAC-SHA256 apiKey=<your-api-key>, signature=<signature>, timestamp=<unix-timestamp>
+Authorization: HMAC-SHA256 apiKey=<your-api-key>, signature=<signature>, timestamp=<unix-timestamp-ms>
 ```
 
 ## Example Request
 
 ```typescript
-const timestamp = Math.floor(Date.now() / 1000);
+const timestamp = Date.now(); // milliseconds
 const signature = generateSignature(secretKey, 'GET', '/games/me', timestamp);
 
-const response = await fetch('https://api.opengameprotocol.com/games/me', {
+const response = await fetch('https://api.play.fun/games/me', {
   headers: {
     Authorization: `HMAC-SHA256 apiKey=${apiKey}, signature=${signature}, timestamp=${timestamp}`,
     'Content-Type': 'application/json',
@@ -136,7 +142,7 @@ When using the Play.fun MCP server, pass credentials as headers:
 ```
 x-api-key: your-api-key
 x-secret-key: your-secret-key
-x-base-url: https://api.opengameprotocol.com (optional)
+x-base-url: https://api.play.fun (optional)
 ```
 
 ## Security Best Practices

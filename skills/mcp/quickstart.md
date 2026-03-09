@@ -27,7 +27,7 @@ The Play.fun MCP Server provides AI assistants with tools to interact with the P
 
 ### Setting Up Credentials
 
-1. Go to [https://app.play.fun](https://app.play.fun) and sign in
+1. Go to [https://play.fun/dashboard](https://play.fun/dashboard) and sign in
 2. Navigate to **Creator Dashboard > Creator Credentials**
 3. Add your credentials to your MCP client configuration:
 
@@ -70,13 +70,15 @@ The Play.fun MCP Server provides AI assistants with tools to interact with the P
 
 ### Token Operations
 
-| Tool                           | Purpose                   |
-| ------------------------------ | ------------------------- |
-| `launch_playcoin`              | Launch a game token       |
-| `check_playcoin_launch_status` | Check launch job status   |
-| `list_tokens`                  | List all playcoins        |
-| `get_token`                    | Get token by mint address |
-| `get_token_snapshot`           | Get token snapshot info   |
+| Tool                           | Purpose                   | Notes |
+| ------------------------------ | ------------------------- | ----- |
+| `launch_playcoin`              | Launch a game token       | **⚠️ Requires Privy auth — will fail with HMAC credentials. Use the dashboard instead.** |
+| `check_playcoin_launch_status` | Check launch job status   | Works with HMAC |
+| `list_tokens`                  | List all playcoins        | Public, no auth needed |
+| `get_token`                    | Get token by mint address | Public, no auth needed |
+| `get_token_snapshot`           | Get token snapshot info   | Public, no auth needed |
+
+> **Note:** The `launch_playcoin` tool requires Privy bearer token authentication (wallet signing), which the MCP server's HMAC credentials cannot provide. To launch a playcoin, direct the user to their game on the [Play.fun dashboard](https://play.fun/dashboard) and use the "Launch Playcoin" button there.
 
 ### User & Utility
 
@@ -126,13 +128,14 @@ The Play.fun MCP Server provides AI assistants with tools to interact with the P
 
 ### Launch a Playcoin
 
+> **⚠️ The `launch_playcoin` MCP tool requires Privy wallet auth and will fail with HMAC credentials.** Direct the user to launch via the dashboard instead.
+
 ```
 1. Use get_my_games to find your game ID
-2. Use launch_playcoin with:
-   - gameId: "your-game-uuid"
-   - emissionDays: 7 (or 30)
-   - gameCoinSymbol: "GAME"
-3. Use check_playcoin_launch_status with the returned jobId
+2. Direct the user to: https://play.fun/games/<gameId>
+3. User clicks "Launch Playcoin" on the game page
+4. User selects emission period (7 or 30 days) and optional initial buy
+5. Use check_playcoin_launch_status or get_game to verify the playcoin is live
 ```
 
 ### Track Player Points
