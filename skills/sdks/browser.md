@@ -85,6 +85,43 @@ sdk.on('error', (err) => {
 });
 ```
 
+## Game Pause / Resume
+
+The SDK emits `GamePause` and `GameResume` events when modals open and close (savePoints widget, login, claim, etc.). **Games MUST listen for these events to pause gameplay while modals are visible.** Without this, gameplay continues behind the modal, causing player deaths, missed inputs, and a broken experience.
+
+```javascript
+sdk.on('GamePause', () => {
+  // Pause your game loop, physics, timers, etc.
+  pauseGame();
+});
+
+sdk.on('GameResume', () => {
+  // Resume gameplay
+  resumeGame();
+});
+```
+
+### Phaser 3
+
+```javascript
+sdk.on('GamePause', () => scene.scene.pause());
+sdk.on('GameResume', () => scene.scene.resume());
+```
+
+### Three.js / custom loop
+
+```javascript
+let paused = false;
+sdk.on('GamePause', () => { paused = true; });
+sdk.on('GameResume', () => { paused = false; });
+
+function gameLoop() {
+  requestAnimationFrame(gameLoop);
+  if (paused) return;
+  // ... update & render
+}
+```
+
 ## Complete Example
 
 ```html
@@ -176,11 +213,13 @@ Save cached points to the Play.fun server. Returns a Promise.
 
 Listen for SDK events.
 
-| Event          | Description            |
-| -------------- | ---------------------- |
-| `OnReady`      | SDK initialized        |
-| `pointsSynced` | Points saved to server |
-| `error`        | An error occurred      |
+| Event          | Description                                      |
+| -------------- | ------------------------------------------------ |
+| `OnReady`      | SDK initialized                                  |
+| `pointsSynced` | Points saved to server                           |
+| `error`        | An error occurred                                |
+| `GamePause`    | A modal is about to open — pause your game       |
+| `GameResume`   | The modal has closed — safe to resume gameplay   |
 
 ## Important Notes
 

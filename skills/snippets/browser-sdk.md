@@ -71,6 +71,15 @@ sdk.on('pointsSynced', (totalPoints) => {
 sdk.on('error', (error) => {
   console.error('SDK error:', error);
 });
+
+// IMPORTANT: Pause/resume gameplay when SDK modals appear
+sdk.on('GamePause', () => {
+  pauseGame(); // Stop game loop, physics, timers
+});
+
+sdk.on('GameResume', () => {
+  resumeGame(); // Resume gameplay
+});
 ```
 
 ## Simple Clicker Game
@@ -147,6 +156,8 @@ sdk.on('error', (error) => {
       let score = 0;
       let gameOver = false;
 
+      let paused = false;
+
       const sdk = new PlayFunSDK({
         gameId: 'your-game-uuid',
         ui: { usePointsWidget: true },
@@ -155,6 +166,10 @@ sdk.on('error', (error) => {
       sdk.init().then(() => {
         startGame();
       });
+
+      // Pause/resume when SDK modals appear/disappear
+      sdk.on('GamePause', () => { paused = true; });
+      sdk.on('GameResume', () => { paused = false; });
 
       function startGame() {
         score = 0;
@@ -177,9 +192,12 @@ sdk.on('error', (error) => {
       function gameLoop() {
         if (gameOver) return;
 
-        // Your game logic here
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.fillText(`Score: ${score}`, 10, 30);
+        // Skip update while SDK modal is open
+        if (!paused) {
+          // Your game logic here
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.fillText(`Score: ${score}`, 10, 30);
+        }
 
         requestAnimationFrame(gameLoop);
       }
@@ -278,6 +296,10 @@ class GameScene extends Phaser.Scene {
       ui: { usePointsWidget: true },
     });
     await this.sdk.init();
+
+    // Pause/resume when SDK modals appear
+    this.sdk.on('GamePause', () => this.scene.pause());
+    this.sdk.on('GameResume', () => this.scene.resume());
 
     // Score text
     this.scoreText = this.add.text(16, 16, 'Score: 0', {
