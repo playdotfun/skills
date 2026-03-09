@@ -39,8 +39,9 @@ git commit -m "Initial commit"
 # 3. Create GitHub repo and push (replace <repo-name> with your game name)
 gh repo create <repo-name> --public --source=. --push
 
-# 4. Enable GitHub Pages on master branch
-gh api repos/$(gh api user --jq '.login')/<repo-name>/pages -X POST --input - <<< '{"build_type":"legacy","source":{"branch":"master","path":"/"}}'
+# 4. Enable GitHub Pages on default branch
+DEFAULT_BRANCH=$(gh api repos/$(gh api user --jq '.login')/<repo-name> --jq '.default_branch')
+gh api repos/$(gh api user --jq '.login')/<repo-name>/pages -X POST --input - <<< "{\"build_type\":\"legacy\",\"source\":{\"branch\":\"$DEFAULT_BRANCH\",\"path\":\"/\"}}"
 
 # 5. Your game is live at:
 # https://<username>.github.io/<repo-name>/
@@ -83,8 +84,9 @@ Options:
 # Get your GitHub username
 GITHUB_USER=$(gh api user --jq '.login')
 
-# Enable Pages on master branch, root directory
-gh api repos/$GITHUB_USER/my-game/pages -X POST --input - <<< '{"build_type":"legacy","source":{"branch":"master","path":"/"}}'
+# Detect default branch and enable Pages
+DEFAULT_BRANCH=$(gh api repos/$GITHUB_USER/my-game --jq '.default_branch')
+gh api repos/$GITHUB_USER/my-game/pages -X POST --input - <<< "{\"build_type\":\"legacy\",\"source\":{\"branch\":\"$DEFAULT_BRANCH\",\"path\":\"/\"}}"
 ```
 
 ### 4. Check Build Status
@@ -114,7 +116,8 @@ REPO_NAME="my-game" && \
 git init && git add . && git commit -m "Initial commit" && \
 gh repo create $REPO_NAME --public --source=. --push && \
 sleep 2 && \
-gh api repos/$(gh api user --jq '.login')/$REPO_NAME/pages -X POST --input - <<< '{"build_type":"legacy","source":{"branch":"master","path":"/"}}' && \
+DEFAULT_BRANCH=$(gh api repos/$(gh api user --jq '.login')/$REPO_NAME --jq '.default_branch') && \
+gh api repos/$(gh api user --jq '.login')/$REPO_NAME/pages -X POST --input - <<< "{\"build_type\":\"legacy\",\"source\":{\"branch\":\"$DEFAULT_BRANCH\",\"path\":\"/\"}}" && \
 echo "Deploying to: https://$(gh api user --jq '.login').github.io/$REPO_NAME/"
 ```
 
@@ -183,7 +186,8 @@ If your game is in a `dist/` or `build/` folder:
 
 ```bash
 # Enable Pages from a subdirectory
-gh api repos/$GITHUB_USER/$REPO_NAME/pages -X POST --input - <<< '{"build_type":"legacy","source":{"branch":"master","path":"/docs"}}'
+DEFAULT_BRANCH=$(gh api repos/$GITHUB_USER/$REPO_NAME --jq '.default_branch')
+gh api repos/$GITHUB_USER/$REPO_NAME/pages -X POST --input - <<< "{\"build_type\":\"legacy\",\"source\":{\"branch\":\"$DEFAULT_BRANCH\",\"path\":\"/docs\"}}"
 ```
 
 Note: GitHub Pages only supports `/` (root) or `/docs` as source paths.

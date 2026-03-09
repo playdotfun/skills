@@ -1,0 +1,57 @@
+# Trigger Positive Test Cases
+# These queries SHOULD trigger the playdotfun skill.
+# Target: >= 90% trigger rate on these queries.
+
+# Direct monetization intent
+"monetize my game"
+"monetize this game"
+"monetize my vibecoded game"
+"I want to monetize my browser game"
+"add monetization to my game"
+"how do I make money from this game"
+
+# Play.fun explicit mentions
+"add Play.fun to this game"
+"integrate Play.fun"
+"set up Play.fun for my game"
+"connect my game to Play.fun"
+"I want to use Play.fun"
+
+# Rewards and points
+"add token rewards to my game"
+"add rewards to my game"
+"add a points system with real rewards"
+"I want players to earn tokens"
+"add crypto rewards"
+
+# Leaderboard
+"add a leaderboard"
+"add a Play.fun leaderboard"
+"I want a leaderboard that tracks points"
+
+# Game registration
+"register my game on Play.fun"
+"register this browser game"
+"I need to register my game"
+
+# SDK integration
+"add the Play.fun SDK"
+"integrate the Play.fun SDK into my game"
+"add the OpenGameSDK to my game"
+
+# Deployment for rewards
+"deploy this game so players earn rewards"
+"deploy my HTML5 game with rewards"
+"deploy my Phaser game to Play.fun"
+
+# Playcoin / token launch
+"launch a Playcoin"
+"launch a token for my game"
+"create a game token"
+"I want to launch a Playcoin for my game"
+
+# Paraphrased / indirect
+"how do I let players earn real rewards in my game"
+"I built a game and want to add earning mechanics"
+"can players earn tokens playing my game"
+"I want my game on Play.fun"

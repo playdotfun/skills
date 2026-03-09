@@ -112,7 +112,7 @@ node skills/scripts/playfun-auth.js setup
 ### Web Callback Flow
 
 1. Run `node skills/scripts/playfun-auth.js callback`
-2. Open browser to `https://app.play.fun/skills-auth?callback=http://localhost:9876`
+2. Open browser to `https://app.play.fun/skills-auth?callback=http://localhost:9876/callback`
 3. Authenticate with Play.fun
 4. Credentials are automatically saved when Play.fun redirects back
 
@@ -129,7 +129,7 @@ node skills/scripts/playfun-auth.js status
 
 # If no credentials, start callback server and open browser
 node skills/scripts/playfun-auth.js callback
-# Then open: https://app.play.fun/skills-auth?callback=http://localhost:9876
+# Then open: https://app.play.fun/skills-auth?callback=http://localhost:9876/callback
 
 # Or manually provide credentials
 node skills/scripts/playfun-auth.js manual YXBpLWtleTpzZWNyZXQta2V5

@@ -1,8 +1,15 @@
 ---
 name: playdotfun
-description: Best practices, references, and templates for integrating games with the Play.fun ecosystem.
+description: Monetizes browser games with Play.fun by guiding game registration, rewards and leaderboard setup, SDK integration, and deployment. Use when the user says "monetize my game", "add Play.fun", "add token rewards", "add a leaderboard", "register my game", "deploy so players earn rewards", or "launch a Playcoin". Do NOT use for generic game design, unrelated Solana questions, or non-game web apps.
+license: MIT
+compatibility: Requires Node.js, Bash, local file access, internet for auth and deployment, and Play.fun MCP server for account and game operations.
 metadata:
-  tags: playfun, games, sdks, templates
+  author: Play.fun
+  version: 1.1.0
+  mcp-server: play-fun
+  category: monetization
+  tags: [playfun, browser-games, phaser, threejs, html5, rewards, leaderboard, solana, monetization]
+  documentation: https://play.fun
 ---
 
 ## When to use
@@ -62,6 +69,7 @@ Do NOT proceed to Phase 4 until you have a valid `gameId` from registration.
 15. **Re-deploy with SDK integration** — Push updated code to the hosted URL
 16. **Update game registration if URL changed** — Use MCP `update_game` tool if the game URL changed
 17. **Final verification** — Play the game at its public URL, verify points save, check the leaderboard with MCP `get_game_leaderboard`
+18. **Playcoin launch (optional)** — The `launch_playcoin` MCP tool requires Privy wallet auth and **will fail with HMAC credentials**. Direct the user to launch via their game page on the [Play.fun dashboard](https://play.fun/dashboard) instead
 
 ### Quick Reference
 
