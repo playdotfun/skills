@@ -1,0 +1,43 @@
+# Trigger Negative Test Cases
+# These queries should NOT trigger the playdotfun skill.
+# Target: <= 10% false positive rate on these queries.
+
+# Generic game design (no monetization intent)
+"make a platformer game"
+"add a jump mechanic"
+"fix the collision detection"
+"add particle effects to my game"
+"how do I animate a sprite in Phaser"
+"design a level for my game"
+
+# Unrelated Solana / crypto
+"how do I create a Solana token"
+"write a Solana smart contract"
+"what is a bonding curve"
+"explain DeFi yield farming"
+"create an NFT collection"
+
+# Non-game web apps
+"build a todo app"
+"create a React dashboard"
+"set up a REST API"
+"deploy my Express server"
+"build a landing page"
+
+# General coding
+"help me write Python code"
+"fix this TypeScript error"
+"refactor this function"
+"what does this regex do"
+"explain async/await"
+
+# Other game engines / platforms
+"deploy my Unity game to Steam"
+"publish my Godot game"
+"add achievements to my mobile app"
+
+# Generic deployment (no Play.fun intent)
+"deploy to Vercel"
+"deploy to Netlify"
+"set up GitHub Actions"
+"configure my CI/CD pipeline"
