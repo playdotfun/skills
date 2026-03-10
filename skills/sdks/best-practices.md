@@ -212,6 +212,29 @@ await client.play.batchSavePoints({
 });
 ```
 
+## Game Pause / Resume on Modals
+
+**Critical UX requirement**: The SDK opens fullscreen modals for `savePoints()`, `login()`, and `showClaim()`. Games **MUST** pause gameplay when these modals appear. Without pausing, players die, miss inputs, or lose progress while the modal blocks the screen.
+
+The SDK emits `GamePause` before any modal opens and `GameResume` when the modal closes:
+
+```javascript
+// Browser SDK — wire pause/resume to your game engine
+sdk.on('GamePause', () => {
+  // Phaser: scene.scene.pause()
+  // Three.js: set a paused flag, skip update in rAF loop
+  // Custom: cancelAnimationFrame, pause timers, etc.
+});
+
+sdk.on('GameResume', () => {
+  // Phaser: scene.scene.resume()
+  // Three.js: clear paused flag
+  // Custom: restart rAF loop, resume timers
+});
+```
+
+This covers all modal-showing methods: `savePoints()` / `endGame()`, `login()`, and `showClaim()`.
+
 ## Testing
 
 ### Development Mode

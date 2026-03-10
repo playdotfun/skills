@@ -119,6 +119,15 @@ sdk.on('LoginSuccess', () => {
   console.log('Session token:', sdk.sessionToken);
 });
 
+// IMPORTANT: Pause/resume gameplay when SDK modals appear
+sdk.on('GamePause', () => {
+  pauseGame(); // Stop game loop, physics, timers
+});
+
+sdk.on('GameResume', () => {
+  resumeGame(); // Resume gameplay
+});
+
 // Listen to ALL events
 sdk.onAll((eventName, data) => {
   console.log(`Event: ${eventName}`, data);
@@ -220,6 +229,8 @@ sdk.off('OnReady', myCallback);
       let sdk = null;
       let sdkReady = false;
 
+      let paused = false;
+
       if (typeof OpenGameSDK !== 'undefined') {
         sdk = new OpenGameSDK({
           ui: { usePointsWidget: true },
@@ -235,6 +246,9 @@ sdk.off('OnReady', myCallback);
         sdk.on('SavePointsFailed', () => console.log('Save failed'));
 
         sdk.init({ gameId: 'your-game-uuid' });
+        // Pause/resume when SDK modals appear/disappear
+        sdk.on('GamePause', () => { paused = true; });
+        sdk.on('GameResume', () => { paused = false; });
       } else {
         // SDK not available, start game anyway
         startGame();
@@ -264,8 +278,13 @@ sdk.off('OnReady', myCallback);
 
       function gameLoop() {
         if (gameOver) return;
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.fillText(`Score: ${score}`, 10, 30);
+
+        // Skip update while SDK modal is open
+        if (!paused) {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.fillText(`Score: ${score}`, 10, 30);
+        }
+
         requestAnimationFrame(gameLoop);
       }
     </script>
@@ -362,6 +381,10 @@ class GameScene extends Phaser.Scene {
       this.sdk.on('OnReady', () => { this.sdkReady = true; });
       this.sdk.on('SavePointsSuccess', () => console.log('Score saved!'));
       this.sdk.on('SavePointsFailed', () => console.log('Save failed'));
+
+      // Pause/resume when SDK modals appear
+      this.sdk.on('GamePause', () => this.scene.pause());
+      this.sdk.on('GameResume', () => this.scene.resume());
 
       this.sdk.init({ gameId: 'your-game-uuid' });
     }
