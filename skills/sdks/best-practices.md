@@ -212,6 +212,59 @@ await client.play.batchSavePoints({
 });
 ```
 
+## Safe Area Layout
+
+Games on Play.fun run fullscreen on mobile Safari. The SDK provides safe area insets so game UI stays visible while backgrounds bleed behind browser controls.
+
+### The Rules
+
+1. **Backgrounds fill the full viewport** — canvas, background images, and decorative elements should use `100vw × 100vh` with no margin. This ensures no gaps appear behind Safari's URL bar or bottom toolbar
+2. **UI elements respect safe area insets** — HUD, buttons, score displays, and interactive controls must be offset by the inset values so they remain visible and tappable
+3. **Always provide a 0px fallback** — when games run standalone (not in the dashboard), the CSS variables are unset. Use `var(--ogp-safe-top-inset, 0px)` to fall back gracefully
+4. **Never hardcode inset pixel values** — the bottom inset varies by Safari tab mode (Top/Bottom/Compact). Always read the CSS variable or SDK property
+
+### HUD Placement Rules
+
+HUD elements must be **fully inside** the safe zone, not just positioned at its edge:
+
+- **Add margin inside the safe zone** — position elements with an additional margin (e.g. 16px) inward from the safe area boundary so they don't sit flush against the edge
+- **Top-anchored UI** stacks downward from `safeTop + margin`
+- **Bottom-anchored UI** stacks upward from `gameHeight - safeBottom - elementHeight - margin`
+- **Never overlap the inset area** — the entire element (including its full height/width) must fit within the safe zone, not just its anchor point
+
+Example for canvas games:
+```javascript
+const margin = 16;
+const safeTop = parseInt(sdk.safeTopInset) || 0;
+const safeBottom = parseInt(sdk.safeBottomInset) || 0;
+
+// Top-left: score text
+ctx.fillText(`Score: ${score}`, margin, safeTop + margin + fontSize);
+
+// Bottom-left: lives text — stack upward from safe bottom
+const bottomY = canvas.height - safeBottom - margin;
+ctx.fillText(`Lives: ${lives}`, margin, bottomY);
+```
+
+### CSS Variables (set automatically by SDK)
+
+```css
+.game-hud-top    { margin-top: var(--ogp-safe-top-inset, 0px); }
+.game-hud-bottom { margin-bottom: var(--ogp-safe-bottom-inset, 0px); }
+```
+
+### JS Properties
+
+```javascript
+const topInset = parseInt(sdk.safeTopInset) || 0;
+const bottomInset = parseInt(sdk.safeBottomInset) || 0;
+const safeHeight = window.innerHeight - topInset - bottomInset;
+```
+
+### Canvas / Phaser / Three.js
+
+For canvas-based games, read the insets via JS and offset your camera, UI overlay, or drawing coordinates. See [Browser SDK Snippets](../snippets/browser-sdk.md#safe-area-insets) for complete examples.
+
 ## Game Pause / Resume on Modals
 
 **Critical UX requirement**: The SDK opens fullscreen modals for `savePoints()`, `login()`, and `showClaim()`. Games **MUST** pause gameplay when these modals appear. Without pausing, players die, miss inputs, or lose progress while the modal blocks the screen.
@@ -268,68 +321,3 @@ await client.play.savePoints({
 console.log("Points saved successfully");
 ```
 
-## Safe Top Inset
-
-When the vanilla SDK mounts the Play.fun widget iframe, it continuously exposes the amount of top-of-screen space occupied by the widget UI.
-
-Agents should account for this whenever they build or modify game layouts, HUDs, pause bars, fixed headers, or any top-aligned interactive element.
-
-### What the SDK exposes
-
-The SDK publishes the occupied top area in two places:
-
-1. SDK state / instance getter
-
-`sdk.safeTopInset`
-
-This is a CSS-ready string such as:
-
-- 0px
-- 70px
-- 100svh
-
-2. Root CSS custom property
-
-var(--ogp-safe-top-inset)
-
-### Behavior
-
-- When the points widget is collapsed but visible, the value reflects the live widget height.
-- When the widget opens fullscreen modal UI, the value becomes 100svh.
-- When the widget is hidden, the value resets to 0px.
-
-### Agent guidance
-
-Agents should treat --ogp-safe-top-inset as the source of truth for top safe area.
-
-Use it when:
-
-- positioning fixed or sticky top UI
-- adding top padding to the game viewport
-- calculating safe hit areas near the top edge
-- preventing overlays, score bars, or buttons from sitting under the Play.fun widget
-
-Avoid:
-
-- hardcoding top offsets like 70px
-- assuming the widget height is constant
-- ignoring fullscreen modal states
-
-### Recommended usage
-
-CSS:
-
-````css
-.game-root {
-  padding-top: var(--ogp-safe-top-inset);
-}```
-
-JS:
-
-```js
-const safeTopInset = sdk.safeTopInset;```
-
-### Design rule
-
-If an agent creates any UI that can appear near the top of the screen, it should explicitly check whether that UI needs to respect var(--ogp-safe-top-inset).
-````

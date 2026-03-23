@@ -36,8 +36,8 @@ Do NOT proceed to Phase 2 until credentials are verified.
 
 #### Phase 2: Build the Game
 
-4. **Build or modify the game** — Create/update the game code. Do NOT add any Play.fun SDK integration yet — get the core game working first
-5. **Test the game works standalone** — Open in browser and verify gameplay functions correctly without SDK
+4. **Build or modify the game** — Create/update the game code. Do NOT add any Play.fun SDK integration yet — get the core game working first. **Use safe area insets in your layout**: backgrounds and canvas should fill the full viewport (`100vw × 100vh`), while all game UI (HUD, buttons, controls) must use `var(--ogp-safe-top-inset, 0px)` and `var(--ogp-safe-bottom-inset, 0px)` for margin/padding. For canvas games, read the insets via JS and offset UI drawing. See [Safe Area Layout](sdks/best-practices.md#safe-area-layout)
+5. **Test the game works standalone** — Open in browser and verify gameplay functions correctly without SDK (safe area variables fall back to 0px)
 
 #### Phase 3: Register the Game on Play.fun
 
