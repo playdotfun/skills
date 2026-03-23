@@ -271,11 +271,16 @@ function getSafeAreaInsetsFromSDK(sdk) {
   };
 }
 
-// Apply to canvas drawing
+// Apply to canvas drawing — elements must be fully inside the safe zone
 const { top, bottom } = getSafeAreaInsets();
+const margin = 16;
 const safeHeight = canvas.height - top - bottom;
-// Draw UI elements offset by `top` from the top
-// Draw bottom UI elements offset by `bottom` from the bottom
+
+// Top UI: stack downward from safeTop + margin
+ctx.fillText(`Score: ${score}`, margin, top + margin + fontSize);
+
+// Bottom UI: stack upward from canvas.height - safeBottom - margin
+ctx.fillText(`Lives: ${lives}`, margin, canvas.height - bottom - margin);
 ```
 
 ### Phaser 3 Safe Area
@@ -285,19 +290,20 @@ const safeHeight = canvas.height - top - bottom;
 const style = getComputedStyle(document.documentElement);
 const topInset = parseInt(style.getPropertyValue('--ogp-safe-top-inset')) || 0;
 const bottomInset = parseInt(style.getPropertyValue('--ogp-safe-bottom-inset')) || 0;
+const margin = 16;
 
-// Position HUD text within the safe area
-this.scoreText = this.add.text(16, 16 + topInset, 'Score: 0', {
+// Top-left: score — offset by safe top + margin, fully inside safe zone
+this.scoreText = this.add.text(margin, topInset + margin, 'Score: 0', {
   fontSize: '32px',
   fill: '#fff',
 }).setScrollFactor(0).setDepth(1000);
 
-// Position bottom UI within the safe area
+// Bottom-left: lives — stack upward from GAME_HEIGHT - safeBottom - margin
 const gameHeight = this.scale.height;
-this.bottomUI = this.add.text(16, gameHeight - 48 - bottomInset, 'Lives: 3', {
+this.livesText = this.add.text(margin, gameHeight - bottomInset - margin - 32, 'Lives: 3', {
   fontSize: '32px',
   fill: '#fff',
-}).setScrollFactor(0).setDepth(1000);
+}).setScrollFactor(0).setDepth(1000).setOrigin(0, 0);
 
 // Adjust camera bounds if needed
 this.cameras.main.setViewport(0, topInset, this.scale.width, this.scale.height - topInset - bottomInset);

@@ -223,6 +223,29 @@ Games on Play.fun run fullscreen on mobile Safari. The SDK provides safe area in
 3. **Always provide a 0px fallback** — when games run standalone (not in the dashboard), the CSS variables are unset. Use `var(--ogp-safe-top-inset, 0px)` to fall back gracefully
 4. **Never hardcode inset pixel values** — the bottom inset varies by Safari tab mode (Top/Bottom/Compact). Always read the CSS variable or SDK property
 
+### HUD Placement Rules
+
+HUD elements must be **fully inside** the safe zone, not just positioned at its edge:
+
+- **Add margin inside the safe zone** — position elements with an additional margin (e.g. 16px) inward from the safe area boundary so they don't sit flush against the edge
+- **Top-anchored UI** stacks downward from `safeTop + margin`
+- **Bottom-anchored UI** stacks upward from `gameHeight - safeBottom - elementHeight - margin`
+- **Never overlap the inset area** — the entire element (including its full height/width) must fit within the safe zone, not just its anchor point
+
+Example for canvas games:
+```javascript
+const margin = 16;
+const safeTop = parseInt(sdk.safeTopInset) || 0;
+const safeBottom = parseInt(sdk.safeBottomInset) || 0;
+
+// Top-left: score text
+ctx.fillText(`Score: ${score}`, margin, safeTop + margin + fontSize);
+
+// Bottom-left: lives text — stack upward from safe bottom
+const bottomY = canvas.height - safeBottom - margin;
+ctx.fillText(`Lives: ${lives}`, margin, bottomY);
+```
+
 ### CSS Variables (set automatically by SDK)
 
 ```css
