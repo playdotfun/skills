@@ -49,10 +49,10 @@ When registering your game, set these limits to prevent abuse:
 
 ```typescript
 await client.games.register({
-  name: 'My Game',
-  description: 'Description',
-  gameUrl: 'https://mygame.com',
-  platform: 'web',
+  name: "My Game",
+  description: "Description",
+  gameUrl: "https://mygame.com",
+  platform: "web",
   // Anti-cheat limits:
   maxScorePerSession: 1000, // Max points per play session
   maxSessionsPerDay: 10, // Max sessions per player per day
@@ -81,8 +81,8 @@ const client = new OpenGameClient({
 
 // BAD: Never hardcode credentials
 const client = new OpenGameClient({
-  apiKey: 'abc123', // DON'T DO THIS
-  secretKey: 'xyz789',
+  apiKey: "abc123", // DON'T DO THIS
+  secretKey: "xyz789",
 });
 ```
 
@@ -91,27 +91,27 @@ const client = new OpenGameClient({
 Always validate scores before submitting to Play.fun:
 
 ```typescript
-app.post('/api/submit-score', async (req, res) => {
+app.post("/api/submit-score", async (req, res) => {
   const { playerId, score, sessionId } = req.body;
 
   // 1. Validate session exists
   const session = await getSession(sessionId);
-  if (!session) return res.status(400).json({ error: 'Invalid session' });
+  if (!session) return res.status(400).json({ error: "Invalid session" });
 
   // 2. Check session ownership
   if (session.playerId !== playerId) {
-    return res.status(400).json({ error: 'Session mismatch' });
+    return res.status(400).json({ error: "Session mismatch" });
   }
 
   // 3. Validate score is reasonable
   const maxPossible = calculateMaxPossibleScore(session);
   if (score > maxPossible) {
-    return res.status(400).json({ error: 'Score too high' });
+    return res.status(400).json({ error: "Score too high" });
   }
 
   // 4. Check for replay attacks
   if (session.submitted) {
-    return res.status(400).json({ error: 'Already submitted' });
+    return res.status(400).json({ error: "Already submitted" });
   }
 
   // 5. Submit to Play.fun
@@ -127,15 +127,15 @@ app.post('/api/submit-score', async (req, res) => {
 Implement rate limiting on your server:
 
 ```typescript
-import rateLimit from 'express-rate-limit';
+import rateLimit from "express-rate-limit";
 
 const scoreLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
   max: 10, // 10 requests per minute
-  message: 'Too many score submissions',
+  message: "Too many score submissions",
 });
 
-app.post('/api/submit-score', scoreLimiter, async (req, res) => {
+app.post("/api/submit-score", scoreLimiter, async (req, res) => {
   // ... handler
 });
 ```
@@ -144,14 +144,14 @@ app.post('/api/submit-score', scoreLimiter, async (req, res) => {
 
 The Server SDK accepts flexible player ID formats:
 
-| Format | Example | Notes |
-|--------|---------|-------|
-| Solana wallet | `sol:9qdvVLY3v...` | Looks up/creates user by Solana address |
-| Ethereum wallet | `eth:0x123...` | Looks up/creates user by ETH address |
-| Email | `email:player@example.com` | Looks up/creates user by email |
-| Twitter/X | `twitter:username` | Looks up/creates user by handle |
-| Privy ID | `did:privy:abc123` | Direct Privy user ID |
-| OGP User ID | `550e8400-e29b-...` | Raw UUID format (fastest) |
+| Format          | Example                    | Notes                                   |
+| --------------- | -------------------------- | --------------------------------------- |
+| Solana wallet   | `sol:9qdvVLY3v...`         | Looks up/creates user by Solana address |
+| Ethereum wallet | `eth:0x123...`             | Looks up/creates user by ETH address    |
+| Email           | `email:player@example.com` | Looks up/creates user by email          |
+| Twitter/X       | `twitter:username`         | Looks up/creates user by handle         |
+| Privy ID        | `did:privy:abc123`         | Direct Privy user ID                    |
+| OGP User ID     | `550e8400-e29b-...`        | Raw UUID format (fastest)               |
 
 ### Session Token (Recommended for Hybrid)
 
@@ -165,10 +165,10 @@ const { valid, ogpId } = await client.play.validateSessionToken(sessionToken);
 
 ```typescript
 // Generate and persist a UUID
-let playerId = localStorage.getItem('playerId');
+let playerId = localStorage.getItem("playerId");
 if (!playerId) {
   playerId = crypto.randomUUID();
-  localStorage.setItem('playerId', playerId);
+  localStorage.setItem("playerId", playerId);
 }
 ```
 
@@ -178,15 +178,15 @@ if (!playerId) {
 try {
   await client.play.savePoints({ gameId, playerId, points });
 } catch (error) {
-  if (error.code === 'RATE_LIMITED') {
+  if (error.code === "RATE_LIMITED") {
     // Retry with backoff
-  } else if (error.code === 'INVALID_GAME') {
+  } else if (error.code === "INVALID_GAME") {
     // Check game ID
-  } else if (error.code === 'POINTS_EXCEEDED') {
+  } else if (error.code === "POINTS_EXCEEDED") {
     // Player hit daily limit
   } else {
     // Log and handle unexpected errors
-    console.error('Failed to save points:', error);
+    console.error("Failed to save points:", error);
   }
 }
 ```
@@ -197,9 +197,9 @@ For efficiency, batch multiple point saves:
 
 ```typescript
 // Instead of multiple single saves:
-await client.play.savePoints({ gameId, playerId: 'p1', points: 100 });
-await client.play.savePoints({ gameId, playerId: 'p2', points: 200 });
-await client.play.savePoints({ gameId, playerId: 'p3', points: 150 });
+await client.play.savePoints({ gameId, playerId: "p1", points: 100 });
+await client.play.savePoints({ gameId, playerId: "p2", points: 200 });
+await client.play.savePoints({ gameId, playerId: "p3", points: 150 });
 
 // Use batch save:
 await client.play.batchSavePoints({
@@ -220,13 +220,13 @@ The SDK emits `GamePause` before any modal opens and `GameResume` when the modal
 
 ```javascript
 // Browser SDK — wire pause/resume to your game engine
-sdk.on('GamePause', () => {
+sdk.on("GamePause", () => {
   // Phaser: scene.scene.pause()
   // Three.js: set a paused flag, skip update in rAF loop
   // Custom: cancelAnimationFrame, pause timers, etc.
 });
 
-sdk.on('GameResume', () => {
+sdk.on("GameResume", () => {
   // Phaser: scene.scene.resume()
   // Three.js: clear paused flag
   // Custom: restart rAF loop, resume timers
@@ -243,7 +243,9 @@ Use a test game for development:
 
 ```typescript
 const GAME_ID =
-  process.env.NODE_ENV === 'production' ? process.env.PROD_GAME_ID : process.env.DEV_GAME_ID;
+  process.env.NODE_ENV === "production"
+    ? process.env.PROD_GAME_ID
+    : process.env.DEV_GAME_ID;
 ```
 
 ### Verifying Integration
@@ -251,17 +253,83 @@ const GAME_ID =
 ```typescript
 // Test connection
 const user = await client.users.me();
-console.log('Connected as:', user.id);
+console.log("Connected as:", user.id);
 
 // Test game access
 const game = await client.games.getById({ gameId: GAME_ID });
-console.log('Game:', game.name);
+console.log("Game:", game.name);
 
 // Test point submission
 await client.play.savePoints({
   gameId: GAME_ID,
-  playerId: 'test-player',
+  playerId: "test-player",
   points: 1,
 });
-console.log('Points saved successfully');
+console.log("Points saved successfully");
 ```
+
+## Safe Top Inset
+
+When the vanilla SDK mounts the Play.fun widget iframe, it continuously exposes the amount of top-of-screen space occupied by the widget UI.
+
+Agents should account for this whenever they build or modify game layouts, HUDs, pause bars, fixed headers, or any top-aligned interactive element.
+
+### What the SDK exposes
+
+The SDK publishes the occupied top area in two places:
+
+1. SDK state / instance getter
+
+`sdk.safeTopInset`
+
+This is a CSS-ready string such as:
+
+- 0px
+- 70px
+- 100svh
+
+2. Root CSS custom property
+
+var(--ogp-safe-top-inset)
+
+### Behavior
+
+- When the points widget is collapsed but visible, the value reflects the live widget height.
+- When the widget opens fullscreen modal UI, the value becomes 100svh.
+- When the widget is hidden, the value resets to 0px.
+
+### Agent guidance
+
+Agents should treat --ogp-safe-top-inset as the source of truth for top safe area.
+
+Use it when:
+
+- positioning fixed or sticky top UI
+- adding top padding to the game viewport
+- calculating safe hit areas near the top edge
+- preventing overlays, score bars, or buttons from sitting under the Play.fun widget
+
+Avoid:
+
+- hardcoding top offsets like 70px
+- assuming the widget height is constant
+- ignoring fullscreen modal states
+
+### Recommended usage
+
+CSS:
+
+````css
+.game-root {
+  padding-top: var(--ogp-safe-top-inset);
+}```
+
+JS:
+
+```js
+const safeTopInset = sdk.safeTopInset;```
+
+### Design rule
+
+If an agent creates any UI that can appear near the top of the screen, it should explicitly check whether that UI needs to respect var(--ogp-safe-top-inset).
+````
