@@ -212,6 +212,36 @@ await client.play.batchSavePoints({
 });
 ```
 
+## Safe Area Layout
+
+Games on Play.fun run fullscreen on mobile Safari. The SDK provides safe area insets so game UI stays visible while backgrounds bleed behind browser controls.
+
+### The Rules
+
+1. **Backgrounds fill the full viewport** — canvas, background images, and decorative elements should use `100vw × 100vh` with no margin. This ensures no gaps appear behind Safari's URL bar or bottom toolbar
+2. **UI elements respect safe area insets** — HUD, buttons, score displays, and interactive controls must be offset by the inset values so they remain visible and tappable
+3. **Always provide a 0px fallback** — when games run standalone (not in the dashboard), the CSS variables are unset. Use `var(--ogp-safe-top-inset, 0px)` to fall back gracefully
+4. **Never hardcode inset pixel values** — the bottom inset varies by Safari tab mode (Top/Bottom/Compact). Always read the CSS variable or SDK property
+
+### CSS Variables (set automatically by SDK)
+
+```css
+.game-hud-top    { margin-top: var(--ogp-safe-top-inset, 0px); }
+.game-hud-bottom { margin-bottom: var(--ogp-safe-bottom-inset, 0px); }
+```
+
+### JS Properties
+
+```javascript
+const topInset = parseInt(sdk.safeTopInset) || 0;
+const bottomInset = parseInt(sdk.safeBottomInset) || 0;
+const safeHeight = window.innerHeight - topInset - bottomInset;
+```
+
+### Canvas / Phaser / Three.js
+
+For canvas-based games, read the insets via JS and offset your camera, UI overlay, or drawing coordinates. See [Browser SDK Snippets](../snippets/browser-sdk.md#safe-area-insets) for complete examples.
+
 ## Game Pause / Resume on Modals
 
 **Critical UX requirement**: The SDK opens fullscreen modals for `savePoints()`, `login()`, and `showClaim()`. Games **MUST** pause gameplay when these modals appear. Without pausing, players die, miss inputs, or lose progress while the modal blocks the screen.
