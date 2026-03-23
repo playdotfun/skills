@@ -52,7 +52,7 @@ The `gameId` is the UUID you get back from registering your game (via the MCP `r
 
 ```javascript
 const sdk = new OpenGameSDK({ ui: { usePointsWidget: true } });
-sdk.init({ gameId: 'your-game-id' }); // Game UUID from registration
+sdk.init({ gameId: "your-game-id" }); // Game UUID from registration
 ```
 
 ### Full Installation Example
@@ -65,8 +65,8 @@ sdk.init({ gameId: 'your-game-id' }); // Game UUID from registration
 <body>
   <script>
     const sdk = new OpenGameSDK({ ui: { usePointsWidget: true } });
-    sdk.init({ gameId: 'your-game-id' }).then(() => {
-      console.log('SDK ready');
+    sdk.init({ gameId: "your-game-id" }).then(() => {
+      console.log("SDK ready");
     });
   </script>
 </body>
@@ -79,17 +79,17 @@ npm install @playdotfun/game-sdk
 ```
 
 ```javascript
-import OpenGameSDK from '@playdotfun/game-sdk';
+import OpenGameSDK from "@playdotfun/game-sdk";
 ```
 
 The `x-ogp-key` meta tag must still be present in your HTML, or pass the key as `apiKey` in the SDK constructor.
 
 ### Two Different IDs — Don't Confuse Them
 
-| Value | Where it goes | Where to get it |
-|-------|--------------|-----------------|
+| Value                      | Where it goes                              | Where to get it                                                                                                                          |
+| -------------------------- | ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | **API Key** (creator UUID) | `<meta name="x-ogp-key" content="HERE" />` | `test_connection` or `get_user_profile` response (`ID` field), or [Play.fun dashboard](https://play.fun/dashboard) > Creator Credentials |
-| **Game ID** (game UUID) | `sdk.init({ gameId: 'HERE' })` | `register_game` response (`id` field) |
+| **Game ID** (game UUID)    | `sdk.init({ gameId: 'HERE' })`             | `register_game` response (`id` field)                                                                                                    |
 
 These are completely different values. The API key identifies **you** (the creator). The game ID identifies **your game**.
 
@@ -100,21 +100,21 @@ These are completely different values. The API key identifies **you** (the creat
 let sdk = null;
 let sdkReady = false;
 
-if (typeof OpenGameSDK !== 'undefined') {
+if (typeof OpenGameSDK !== "undefined") {
   sdk = new OpenGameSDK({
     ui: { usePointsWidget: true },
-    logLevel: 'info',
+    logLevel: "info",
   });
 
-  sdk.on('OnReady', () => {
+  sdk.on("OnReady", () => {
     sdkReady = true;
-    console.log('SDK ready!');
+    console.log("SDK ready!");
   });
 
-  sdk.on('SavePointsSuccess', () => console.log('Score saved!'));
-  sdk.on('SavePointsFailed', () => console.log('Save failed'));
+  sdk.on("SavePointsSuccess", () => console.log("Score saved!"));
+  sdk.on("SavePointsFailed", () => console.log("Save failed"));
 
-  sdk.init({ gameId: 'your-game-uuid' });
+  sdk.init({ gameId: "your-game-uuid" });
 }
 
 // Add points during gameplay (always check ready state)
@@ -134,17 +134,17 @@ if (sdk && sdkReady) {
 ```javascript
 const sdk = new OpenGameSDK({
   ui: {
-    usePointsWidget: true,  // Show Play.fun points widget (default: true)
-    theme: 'system',        // 'dark', 'light', or 'system' (default: 'system')
-    useCustomUI: false,     // Disable built-in widgets/modals (default: false)
+    usePointsWidget: true, // Show Play.fun points widget (default: true)
+    theme: "system", // 'dark', 'light', or 'system' (default: 'system')
+    useCustomUI: false, // Disable built-in widgets/modals (default: false)
   },
-  logLevel: 'info',         // 'debug', 'info', 'warn', 'error'
-  apiKey: 'optional',       // Auto-reads from meta tag if omitted
-  gameId: 'optional',       // Can also be set via init()
-  baseUrl: 'optional',      // Override API endpoint for development
+  logLevel: "info", // 'debug', 'info', 'warn', 'error'
+  apiKey: "optional", // Auto-reads from meta tag if omitted
+  gameId: "optional", // Can also be set via init()
+  baseUrl: "optional", // Override API endpoint for development
 });
 
-sdk.init({ gameId: 'your-game-uuid' });
+sdk.init({ gameId: "your-game-uuid" });
 ```
 
 ## Points Flow
@@ -154,7 +154,7 @@ The SDK uses an **addPoints → endGame** pattern:
 1. **`addPoints(amount)`** — Accumulates points locally during gameplay. Points display in the widget but are not finalized until `endGame()`.
 2. **`endGame()`** — Commits all accumulated points. Opens a blocking modal showing loading, success (with points boost prompt), or error. Auto-triggers login if player isn't authenticated.
 
-**Best practice:** To prevent duplicate rewards, only add the *difference* when players beat their best:
+**Best practice:** To prevent duplicate rewards, only add the _difference_ when players beat their best:
 
 ```javascript
 // Track improvements, not absolute scores
@@ -173,24 +173,24 @@ function onScoreUpdate(newScore) {
 
 ```javascript
 // Listen to specific events
-sdk.on('OnReady', () => {
-  console.log('SDK initialized and ready');
+sdk.on("OnReady", () => {
+  console.log("SDK initialized and ready");
 });
 
-sdk.on('SessionStarted', () => {
-  console.log('Game session started');
+sdk.on("SessionStarted", () => {
+  console.log("Game session started");
 });
 
-sdk.on('SavePointsSuccess', () => {
-  console.log('Points saved to server');
+sdk.on("SavePointsSuccess", () => {
+  console.log("Points saved to server");
 });
 
-sdk.on('SavePointsFailed', (err) => {
-  console.error('Failed to save points:', err);
+sdk.on("SavePointsFailed", (err) => {
+  console.error("Failed to save points:", err);
 });
 
-sdk.on('LoginSuccess', () => {
-  console.log('Player logged in, ID:', sdk.playerId);
+sdk.on("LoginSuccess", () => {
+  console.log("Player logged in, ID:", sdk.playerId);
 });
 
 // Listen to ALL events
@@ -199,8 +199,8 @@ sdk.onAll((eventName, data) => {
 });
 
 // Unsubscribe from events
-sdk.off('OnReady', callback);
-sdk.off('*', callback); // Unsubscribe from onAll
+sdk.off("OnReady", callback);
+sdk.off("*", callback); // Unsubscribe from onAll
 ```
 
 ## Safe Area Insets
@@ -279,12 +279,12 @@ const bottomInset = parseInt(sdk.safeBottomInset) || 0;
 The SDK emits `GamePause` and `GameResume` events when modals open and close (savePoints widget, login, claim, etc.). **Games MUST listen for these events to pause gameplay while modals are visible.** Without this, gameplay continues behind the modal, causing player deaths, missed inputs, and a broken experience.
 
 ```javascript
-sdk.on('GamePause', () => {
+sdk.on("GamePause", () => {
   // Pause your game loop, physics, timers, etc.
   pauseGame();
 });
 
-sdk.on('GameResume', () => {
+sdk.on("GameResume", () => {
   // Resume gameplay
   resumeGame();
 });
@@ -293,16 +293,20 @@ sdk.on('GameResume', () => {
 ### Phaser 3
 
 ```javascript
-sdk.on('GamePause', () => scene.scene.pause());
-sdk.on('GameResume', () => scene.scene.resume());
+sdk.on("GamePause", () => scene.scene.pause());
+sdk.on("GameResume", () => scene.scene.resume());
 ```
 
 ### Three.js / custom loop
 
 ```javascript
 let paused = false;
-sdk.on('GamePause', () => { paused = true; });
-sdk.on('GameResume', () => { paused = false; });
+sdk.on("GamePause", () => {
+  paused = true;
+});
+sdk.on("GameResume", () => {
+  paused = false;
+});
 
 function gameLoop() {
   requestAnimationFrame(gameLoop);
@@ -348,36 +352,36 @@ function gameLoop() {
       let sdkReady = false;
 
       // Guard against SDK load failure - game still works without it
-      if (typeof OpenGameSDK !== 'undefined') {
+      if (typeof OpenGameSDK !== "undefined") {
         sdk = new OpenGameSDK({
           ui: { usePointsWidget: true },
-          logLevel: 'info',
+          logLevel: "info",
         });
 
-        sdk.on('OnReady', () => {
+        sdk.on("OnReady", () => {
           sdkReady = true;
-          console.log('SDK ready!');
+          console.log("SDK ready!");
         });
 
-        sdk.on('SavePointsSuccess', () => console.log('Score saved!'));
-        sdk.on('SavePointsFailed', () => console.log('Save failed'));
+        sdk.on("SavePointsSuccess", () => console.log("Score saved!"));
+        sdk.on("SavePointsFailed", () => console.log("Save failed"));
 
-        sdk.init({ gameId: 'your-game-uuid' });
+        sdk.init({ gameId: "your-game-uuid" });
       }
 
-      document.getElementById('click-btn').onclick = () => {
+      document.getElementById("click-btn").onclick = () => {
         totalPoints += 10;
-        document.getElementById('points').textContent = totalPoints;
+        document.getElementById("points").textContent = totalPoints;
         if (sdk && sdkReady) sdk.addPoints(10);
       };
 
       // End game - saves all accumulated points via blocking modal
-      document.getElementById('end-btn').onclick = async () => {
+      document.getElementById("end-btn").onclick = async () => {
         if (sdk && sdkReady) {
           try {
             await sdk.endGame();
           } catch (e) {
-            console.log('Save error:', e);
+            console.log("Save error:", e);
           }
         }
       };
@@ -402,15 +406,15 @@ const sdk = new OpenGameSDK({
   ui: { usePointsWidget: true },
 });
 
-sdk.init({ gameId: 'your-game-uuid' });
+sdk.init({ gameId: "your-game-uuid" });
 ```
 
 ## UI Methods
 
 ```javascript
-sdk.showPoints();           // Show the points widget
-sdk.hidePoints();           // Hide the points widget
-sdk.setTheme('dark');       // Toggle 'light', 'dark', or 'system' theme
+sdk.showPoints(); // Show the points widget
+sdk.hidePoints(); // Hide the points widget
+sdk.setTheme("dark"); // Toggle 'light', 'dark', or 'system' theme
 ```
 
 ## Session Token
@@ -432,15 +436,15 @@ Use this token with the Server SDK's `validateSessionToken()` for hybrid integra
 
 Creates a new SDK instance.
 
-| Option               | Type    | Default    | Description                                    |
-| -------------------- | ------- | ---------- | ---------------------------------------------- |
-| `ui.usePointsWidget` | boolean | `true`     | Show the points widget                         |
+| Option               | Type    | Default    | Description                                      |
+| -------------------- | ------- | ---------- | ------------------------------------------------ |
+| `ui.usePointsWidget` | boolean | `true`     | Show the points widget                           |
 | `ui.theme`           | string  | `'system'` | Widget theme: `'dark'`, `'light'`, or `'system'` |
-| `ui.useCustomUI`     | boolean | `false`    | Disable built-in widgets and modals            |
-| `logLevel`           | string  | `'warn'`   | `'debug'`, `'info'`, `'warn'`, `'error'`       |
-| `apiKey`             | string  | -          | Auto-reads from meta tag if omitted            |
-| `gameId`             | string  | -          | Can also be set via `init()`                   |
-| `baseUrl`            | string  | -          | Override API endpoint for development          |
+| `ui.useCustomUI`     | boolean | `false`    | Disable built-in widgets and modals              |
+| `logLevel`           | string  | `'warn'`   | `'debug'`, `'info'`, `'warn'`, `'error'`         |
+| `apiKey`             | string  | -          | Auto-reads from meta tag if omitted              |
+| `gameId`             | string  | -          | Can also be set via `init()`                     |
+| `baseUrl`            | string  | -          | Override API endpoint for development            |
 
 ### `sdk.init({ gameId })`
 
@@ -481,7 +485,7 @@ Fetch available rewards for the player, grouped by game and token breakdown.
 Claim rewards for specified token mint addresses. Returns a mapping of `gameId:tokenAddress` to transaction signatures.
 
 ```javascript
-await sdk.claimRewards(['token-address-1', 'token-address-2']);
+await sdk.claimRewards(["token-address-1", "token-address-2"]);
 ```
 
 ### `sdk.refreshPointsAndMultiplier()`
@@ -508,25 +512,25 @@ After login, this contains the player's Privy ID. Use it as the canonical user k
 
 Listen for SDK events.
 
-| Event                  | Description                                    |
-| ---------------------- | ---------------------------------------------- |
-| `OnReady`              | SDK initialized                                |
-| `SessionStarted`       | Game session started                           |
-| `SessionEnded`         | Game session ended                             |
-| `LoginRequest`         | Login flow initiated                           |
-| `LoginSuccess`         | Player logged in successfully                  |
-| `LoginFailed`          | Login failed                                   |
-| `LoginCancelled`       | Player cancelled login                         |
-| `Logout`               | Player logged out                              |
-| `SavePointsSuccess`    | Points saved to server                         |
-| `SavePointsFailed`     | Points save failed                             |
-| `SavePointsCancelled`  | Points save cancelled                          |
-| `ClaimRequest`         | Reward claim initiated                         |
-| `ClaimSuccess`         | Reward claimed successfully                    |
-| `ClaimFailed`          | Reward claim failed                            |
-| `ClaimCancelled`       | Reward claim cancelled                         |
-| `GamePause`            | A modal is about to open — pause your game     |
-| `GameResume`           | The modal has closed — safe to resume gameplay |
+| Event                 | Description                                    |
+| --------------------- | ---------------------------------------------- |
+| `OnReady`             | SDK initialized                                |
+| `SessionStarted`      | Game session started                           |
+| `SessionEnded`        | Game session ended                             |
+| `LoginRequest`        | Login flow initiated                           |
+| `LoginSuccess`        | Player logged in successfully                  |
+| `LoginFailed`         | Login failed                                   |
+| `LoginCancelled`      | Player cancelled login                         |
+| `Logout`              | Player logged out                              |
+| `SavePointsSuccess`   | Points saved to server                         |
+| `SavePointsFailed`    | Points save failed                             |
+| `SavePointsCancelled` | Points save cancelled                          |
+| `ClaimRequest`        | Reward claim initiated                         |
+| `ClaimSuccess`        | Reward claimed successfully                    |
+| `ClaimFailed`         | Reward claim failed                            |
+| `ClaimCancelled`      | Reward claim cancelled                         |
+| `GamePause`           | A modal is about to open — pause your game     |
+| `GameResume`          | The modal has closed — safe to resume gameplay |
 
 ### `sdk.onAll(callback)`
 
@@ -549,3 +553,69 @@ Public examples: [https://github.com/playdotfun/ogp-demos](https://github.com/pl
 - **Auto-login on endGame**: `endGame()` triggers login if the player isn't authenticated
 - **Player ID**: After login, `sdk.playerId` provides the player's Privy ID
 - **Hybrid note**: For hybrid integrations, do NOT call `endGame()` on the client. Save via Server SDK and call `refreshPointsAndMultiplier()` to sync the widget
+
+## Safe Top Inset
+
+When the vanilla SDK mounts the Play.fun widget iframe, it continuously exposes the amount of top-of-screen space occupied by the widget UI.
+
+Agents should account for this whenever they build or modify game layouts, HUDs, pause bars, fixed headers, or any top-aligned interactive element.
+
+### What the SDK exposes
+
+The SDK publishes the occupied top area in two places:
+
+1. SDK state / instance getter
+
+`sdk.safeTopInset`
+
+This is a CSS-ready string such as:
+
+- 0px
+- 70px
+- 100svh
+
+2. Root CSS custom property
+
+var(--ogp-safe-top-inset)
+
+### Behavior
+
+- When the points widget is collapsed but visible, the value reflects the live widget height.
+- When the widget opens fullscreen modal UI, the value becomes 100svh.
+- When the widget is hidden, the value resets to 0px.
+
+### Agent guidance
+
+Agents should treat --ogp-safe-top-inset as the source of truth for top safe area.
+
+Use it when:
+
+- positioning fixed or sticky top UI
+- adding top padding to the game viewport
+- calculating safe hit areas near the top edge
+- preventing overlays, score bars, or buttons from sitting under the Play.fun widget
+
+Avoid:
+
+- hardcoding top offsets like 70px
+- assuming the widget height is constant
+- ignoring fullscreen modal states
+
+### Recommended usage
+
+CSS:
+
+````css
+.game-root {
+  padding-top: var(--ogp-safe-top-inset);
+}```
+
+JS:
+
+```js
+const safeTopInset = sdk.safeTopInset;```
+
+### Design rule
+
+If an agent creates any UI that can appear near the top of the screen, it should explicitly check whether that UI needs to respect var(--ogp-safe-top-inset).
+````
